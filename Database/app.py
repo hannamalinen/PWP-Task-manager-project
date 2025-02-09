@@ -24,10 +24,10 @@ class Task(db.Model):
     created_at = db.Column(db.DateTime, nullable=True)
     updated_at = db.Column(db.DateTime, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    usergroup_id = db.Column(db.Integer, db.ForeignKey('usergroup.id'), nullable=False)
+    usergroup_id = db.Column(db.Integer, db.ForeignKey('user_group.id'), nullable=False)
 
     user = db.relationship("User", back_populates="tasks")
-    user_group = db.relationship("UserGroup", back_populates="task")
+    user_group = db.relationship("UserGroup", back_populates="tasks")
 
 class Group(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -88,7 +88,7 @@ def create_group():
     return "POST method required", 405
 
 
-@app.route("/group/<user>/add/", methods=["POST"])
+@app.route("/group/<group_id>/add/", methods=["POST"])
 def add_user_to_group(group_id):
     if request.method == "POST":
         if not request.is_json:
@@ -114,3 +114,11 @@ def add_user_to_group(group_id):
         db.session.commit()
 
         return jsonify({"message": "User added to group successfully"}), 201
+    
+@app.route('/group/<int:group_id>/members', methods=['GET'])
+def get_group_members(group_id):
+    group = Group.query.get(group_id)
+    if not group:
+        return jsonify({"error": "Group not found"}), 404
+    members = group.user_groups
+    return jsonify([{"id": member.user.id, "name": member.user.name, "email": member.user.email} for member in members])
