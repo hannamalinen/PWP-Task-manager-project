@@ -24,7 +24,7 @@ class Task(db.Model):
     deadline = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, nullable=True)
     updated_at = db.Column(db.DateTime, nullable=False)
-    usergroup_id = db.Column(db.Integer, db.ForeignKey('user_group.id', ondelete='SET NULL'), nullable=False)
+    usergroup_id = db.Column(db.Integer, db.ForeignKey('user_group.id', ondelete='SET NULL'), nullable=False)  # ondelete='SET NULL' is used to set the foreign key to NULL when the referenced row is deleted
 
     user_group = db.relationship("UserGroup", back_populates="tasks")
 
@@ -36,8 +36,8 @@ class Group(db.Model):
 
 class UserGroup(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
-    group_id = db.Column(db.Integer, db.ForeignKey('group.id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)  # ondelete='CASCADE' is used to delete all the rows in the child table when the referenced row in the parent table is deleted
+    group_id = db.Column(db.Integer, db.ForeignKey('group.id', ondelete='CASCADE'), nullable=False)  # ondelete='CASCADE' is used to delete all the rows in the child table when the referenced row in the parent table is deleted
 
     user = db.relationship("User", back_populates="user_groups")
     groups = db.relationship("Group", back_populates="user_groups")
