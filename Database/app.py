@@ -7,7 +7,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///task_management.db" ## our da
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app) 
 
-# from exercise 1
+# models from exercise 1
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), nullable=False)
@@ -43,7 +43,10 @@ class UserGroup(db.Model):
     groups = db.relationship("Group", back_populates="user_groups")
     tasks = db.relationship("Task", back_populates="user_group")
 
-## From Exercise 1
+
+## help from exercise 1
+
+# adding a user
 @app.route("/user/add/", methods=["POST"])
 def add_user():
     if request.method == "POST":
@@ -67,6 +70,7 @@ def add_user():
     
     return "POST method required", 405
 
+# creating group
 @app.route('/group', methods=['POST'])
 def create_group():
     if request.method == "POST":
@@ -85,7 +89,7 @@ def create_group():
     
     return "POST method required", 405
 
-
+# adding user to group
 @app.route("/group/<group_id>/add/", methods=["POST"])
 def add_user_to_group(group_id):
     if request.method == "POST":
@@ -113,7 +117,8 @@ def add_user_to_group(group_id):
 
         return jsonify({"message": "User added to group successfully"}), 201
     return "POST method required", 405
-    
+
+# getting group members    
 @app.route('/group/<group_id>/members', methods=['GET'])
 def get_group_members(group_id):
     group = Group.query.get(group_id)
@@ -122,6 +127,7 @@ def get_group_members(group_id):
     members = group.user_groups
     return jsonify([{"id": member.user.id, "name": member.user.name, "email": member.user.email} for member in members])
 
+# getting group tasks
 @app.route('/group/<group_id>/tasks', methods=['GET'])
 def get_group_tasks(group_id):
     group = Group.query.get(group_id)
@@ -141,6 +147,7 @@ def get_group_tasks(group_id):
         "usergroup_id": task.usergroup_id
     } for task in tasks])
 
+# adding task to group
 @app.route("/group/<group_id>/task/add/", methods=["POST"])
 def add_task(group_id):
     if request.method == "POST":
@@ -173,7 +180,8 @@ def add_task(group_id):
         db.session.commit()
         return jsonify({"message": "Task added successfully"}), 201
     return "POST method required", 405
-        
+
+# getting all tasks        
 @app.route("/task/get/", methods=["GET"])
 def get_tasks():
     if request.method == "GET":
