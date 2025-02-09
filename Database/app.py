@@ -2,10 +2,11 @@ from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///task_management.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///task_management.db" ## our database
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app) 
 
+# from exercise 1
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), nullable=False)
@@ -44,6 +45,7 @@ class UserGroup(db.Model):
     groups = db.relationship("Group", back_populates="user_groups")
     tasks = db.relationship("Task", back_populates="user_group")
 
+## From Exercise 1
 @app.route("/user/add/", methods=["POST"])
 def add_user():
     if request.method == "POST":
@@ -55,8 +57,6 @@ def add_user():
             password = request.json["password"]
         except KeyError:
             return "Incomplete request - missing fields", 400
-        except ValueError:
-            return "Weight and price must be numbers", 400 
         
         if User.query.filter_by(email=email).first():
             return "Email already exists", 400
@@ -114,11 +114,52 @@ def add_user_to_group(group_id):
         db.session.commit()
 
         return jsonify({"message": "User added to group successfully"}), 201
+    return "POST method required", 405
     
-@app.route('/group/<int:group_id>/members', methods=['GET'])
+@app.route('/group/<group_id>/members', methods=['GET'])
 def get_group_members(group_id):
     group = Group.query.get(group_id)
     if not group:
         return jsonify({"error": "Group not found"}), 404
     members = group.user_groups
     return jsonify([{"id": member.user.id, "name": member.user.name, "email": member.user.email} for member in members])
+
+@app.route('/group/<group_id>/tasks', methods=['GET'])
+def get_group_tasks(group_id):
+    group = Group.query.get(group_id)
+    if not group:
+        return jsonify({"error": "Group not found"}), 404
+    tasks = group.tasks
+    return jsonify([{"id": task.id, "title": task.title, "description": task.description, "status": task.status, "deadline": task.deadline, "created_at": task.created_at, "updated_at": task.updated_at, "user_id": task.user_id, "usergroup_id": task.usergroup_id} for task in tasks])
+
+@app.route("/task/add/", methods=["POST"])
+def add_task():
+    if request.method == "POST":
+        if not request.is_json:
+            return "Request content type must be JSON", 415
+        try:
+            id = request.json["id"]
+            title = request.json["title"]
+            description = request.json["description"]
+            status = request.json["status"]
+            deadline = request.json["deadline"]
+            created_at = request.json["created_at"]
+            updated_at = request.json["updated_at"]
+            user_id = request.json["user_id"]
+            usergroup_id = request.json["usergroup_id"]
+        except KeyError:
+            return "Incomplete request - missing information", 400
+        if Task.query.filter_by(id=id).first():
+            return "Task already exists", 400
+        task = Task(id=id, title=title, description=description, status=status, deadline=deadline, created_at=created_at, updated_at=updated_at, user_id=user_id, usergroup_id=usergroup_id)
+        db.session.add(task)
+        db.session.commit()
+    return "POST method required", 405
+        
+@app.route("/task/get/", methods=["GET"])
+def get_tasks():
+    if request.method == "GET":
+        tasks = Task.query.all()
+        task_list = [{"id": task.id, "title": task.title, "description": task.description, "status": task.status, "deadline": task.deadline, "created_at": task.created_at, "updated_at": task.updated_at, "user_id": task.user_id, "usergroup_id": task.usergroup_id} for task in tasks]
+        return jsonify(task_list), 200
+    return "GET method required", 405
