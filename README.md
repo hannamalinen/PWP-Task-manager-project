@@ -12,8 +12,7 @@ __Remember to include all required documentation and HOWTOs, including how to cr
 Used database framework: SQLite
 Database/instance/task_management.db <-- our populated database
 
-Requirements.txt included in the Github (requirements.txt)
-
+Requirements included in the Github (requirements.txt)
 
 
 Remember to activate your virtual environment with these commands:
@@ -56,10 +55,10 @@ flask run
 
 
 ## Populating the database
-Data can be sent using curl-commands or Postman.
+Data can be sent using curl-commands or Postman. We mainly used curl-commands at this point
 
 Using SQLite: 
-POST, GET, 
+POST, GET
 
 ## User-related commands
 ## Adding new user (name, email, password)
@@ -68,7 +67,8 @@ curl -X POST http://127.0.0.1:5000/user/add/ -H "Content-Type: application/json"
 ## UserGroup-related commands
 ## Adding new user to a group (group number)
 curl -X POST http://127.0.0.1:5000/group/1/add/ -H "Content-Type: application/json" -d "{"user_id": 1}"
-
+## Getting the groups designated tasks
+curl -X GET http://127.0.0.1:5000/group/1/tasks
 
 ## Group-related commands
 ## Adding new group
@@ -76,4 +76,10 @@ curl -X POST http://127.0.0.1:5000/group -H "Content-Type: application/json" -d 
 To check members of the group
 curl -X GET http://127.0.0.1:5000/group/1/members
 
+## Task-related commands
+## Getting all tasks
+curl -X GET http://127.0.0.1:5000/task/get/
+
+##Adding a new task
+curl -X POST http://127.0.0.1:5000/group/1/task/add/ -H "Content-Type: application/json" -d "{"title": "Complete project", "description": "Finish the project by end of the week", "status": 1, "deadline": "2025-02-15T00:00:00", "created_at": "2025-02-01T00:00:00", "updated_at": "2025-02-01T00:00:00"}"
 
