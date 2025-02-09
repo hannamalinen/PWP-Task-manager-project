@@ -80,13 +80,13 @@ curl -X GET http://127.0.0.1:5000/group/1/tasks
 ## Group-related commands
 ## Adding new group
 curl -X POST http://127.0.0.1:5000/group -H "Content-Type: application/json" -d "{"name": "Developers"}"
-To check members of the group
+## To check members of the group
 curl -X GET http://127.0.0.1:5000/group/1/members
 
 ## Task-related commands
 ## Getting all tasks
 curl -X GET http://127.0.0.1:5000/task/get/
 
-##Adding a new task
+## Adding a new task
 curl -X POST http://127.0.0.1:5000/group/1/task/add/ -H "Content-Type: application/json" -d "{"title": "Complete project", "description": "Finish the project by end of the week", "status": 1, "deadline": "2025-02-15T00:00:00", "created_at": "2025-02-01T00:00:00", "updated_at": "2025-02-01T00:00:00"}"
 
