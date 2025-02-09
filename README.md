@@ -10,13 +10,20 @@
 __Remember to include all required documentation and HOWTOs, including how to create and populate the database, how to run and test the API, the url to the entrypoint, instructions on how to setup and run the client, instructions on how to setup and run the axiliary service and instructions on how to deploy the api in a production environment__
 
 Used database framework: SQLite
-Database/instance/task_management.db <-- our populated database
+sqlite3 version: 2.6.0
+python version: 3.12.6
 
-Requirements included in the Github (requirements.txt)
+Database/instance/task_management.db <-- our populated database is included in the database
 
+! Requirements included in the Github (requirements.txt) !
+Needed requirements:
+Flask
+Flask-SQLAlchemy
+datetime
 
 Remember to activate your virtual environment with these commands:
 In all steps, check if you are in the right directory!
+
 cd Database
 
 ## creating a virtual environment
@@ -48,8 +55,9 @@ ctx.push()
 db.create_all()
 ctx.pop()
 
-In another terminal:
+After creating a database, start another terminal and run this command:
 flask run
+Then we can start with our database and give commands to it! Our HTTP address is 127.0.0.1/5000
 
 ![Näyttökuva 2025-02-09 kello 16 00 48](https://github.com/user-attachments/assets/c937b2db-a4ef-4f5b-b46b-7e1b34c7bca0)
 
@@ -57,8 +65,7 @@ flask run
 ## Populating the database
 Data can be sent using curl-commands or Postman. We mainly used curl-commands at this point
 
-Using SQLite: 
-POST, GET
+We only used: POST, GET
 
 ## User-related commands
 ## Adding new user (name, email, password)
