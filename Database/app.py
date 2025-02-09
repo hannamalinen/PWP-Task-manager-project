@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///task_management.db" ## our database
@@ -13,8 +14,7 @@ class User(db.Model):
     email = db.Column(db.String(64), unique=True, nullable=False)
     password = db.Column(db.String(64), nullable=False)
 
-    tasks = db.relationship("Task", back_populates="user")
-    user_groups = db.relationship("UserGroup", back_populates="user")
+    user_groups = db.relationship("UserGroup", back_populates="user", cascade="all, delete-orphan")
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -24,22 +24,20 @@ class Task(db.Model):
     deadline = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, nullable=True)
     updated_at = db.Column(db.DateTime, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    usergroup_id = db.Column(db.Integer, db.ForeignKey('user_group.id'), nullable=False)
+    usergroup_id = db.Column(db.Integer, db.ForeignKey('user_group.id', ondelete='SET NULL'), nullable=False)
 
-    user = db.relationship("User", back_populates="tasks")
     user_group = db.relationship("UserGroup", back_populates="tasks")
 
 class Group(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), nullable=False)
 
-    user_groups = db.relationship("UserGroup", back_populates="groups")
+    user_groups = db.relationship("UserGroup", back_populates="groups", cascade="all, delete-orphan")
 
 class UserGroup(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    group_id = db.Column(db.Integer, db.ForeignKey('group.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    group_id = db.Column(db.Integer, db.ForeignKey('group.id', ondelete='CASCADE'), nullable=False)
 
     user = db.relationship("User", back_populates="user_groups")
     groups = db.relationship("Group", back_populates="user_groups")
@@ -129,37 +127,57 @@ def get_group_tasks(group_id):
     group = Group.query.get(group_id)
     if not group:
         return jsonify({"error": "Group not found"}), 404
-    tasks = group.tasks
-    return jsonify([{"id": task.id, "title": task.title, "description": task.description, "status": task.status, "deadline": task.deadline, "created_at": task.created_at, "updated_at": task.updated_at, "user_id": task.user_id, "usergroup_id": task.usergroup_id} for task in tasks])
+    user_groups = UserGroup.query.filter_by(group_id=group_id).all()
+    usergroup_ids = [ug.id for ug in user_groups]
+    tasks = Task.query.filter(Task.usergroup_id.in_(usergroup_ids)).all()
+    return jsonify([{
+        "id": task.id,
+        "title": task.title,
+        "description": task.description,
+        "status": task.status,
+        "deadline": task.deadline,
+        "created_at": task.created_at,
+        "updated_at": task.updated_at,
+        "usergroup_id": task.usergroup_id
+    } for task in tasks])
 
-@app.route("/task/add/", methods=["POST"])
-def add_task():
+@app.route("/group/<group_id>/task/add/", methods=["POST"])
+def add_task(group_id):
     if request.method == "POST":
         if not request.is_json:
             return "Request content type must be JSON", 415
         try:
-            id = request.json["id"]
             title = request.json["title"]
             description = request.json["description"]
             status = request.json["status"]
-            deadline = request.json["deadline"]
-            created_at = request.json["created_at"]
-            updated_at = request.json["updated_at"]
-            user_id = request.json["user_id"]
-            usergroup_id = request.json["usergroup_id"]
+            deadline = datetime.strptime(request.json["deadline"], '%Y-%m-%dT%H:%M:%S')
+            created_at = datetime.strptime(request.json["created_at"], '%Y-%m-%dT%H:%M:%S')
+            updated_at = datetime.strptime(request.json["updated_at"], '%Y-%m-%dT%H:%M:%S')
         except KeyError:
             return "Incomplete request - missing information", 400
-        if Task.query.filter_by(id=id).first():
+        
+        group = Group.query.get(group_id)
+        if not group:
+            return jsonify({"error": "Group not found"}), 404
+        
+        user_group = UserGroup.query.filter_by(group_id=group_id).first()
+        if not user_group:
+            return jsonify({"error": "UserGroup not found for the given group"}), 404
+        
+        usergroup_id = user_group.id
+
+        if Task.query.filter_by(title=title, usergroup_id=usergroup_id).first():
             return "Task already exists", 400
-        task = Task(id=id, title=title, description=description, status=status, deadline=deadline, created_at=created_at, updated_at=updated_at, user_id=user_id, usergroup_id=usergroup_id)
+        task = Task(title=title, description=description, status=status, deadline=deadline, created_at=created_at, updated_at=updated_at, usergroup_id=usergroup_id)
         db.session.add(task)
         db.session.commit()
+        return jsonify({"message": "Task added successfully"}), 201
     return "POST method required", 405
         
 @app.route("/task/get/", methods=["GET"])
 def get_tasks():
     if request.method == "GET":
         tasks = Task.query.all()
-        task_list = [{"id": task.id, "title": task.title, "description": task.description, "status": task.status, "deadline": task.deadline, "created_at": task.created_at, "updated_at": task.updated_at, "user_id": task.user_id, "usergroup_id": task.usergroup_id} for task in tasks]
+        task_list = [{"id": task.id, "title": task.title, "description": task.description, "status": task.status, "deadline": task.deadline, "created_at": task.created_at, "updated_at": task.updated_at, "usergroup_id": task.usergroup_id} for task in tasks]
         return jsonify(task_list), 200
     return "GET method required", 405
