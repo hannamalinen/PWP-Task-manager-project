@@ -69,24 +69,44 @@ We only used: POST, GET
 
 ## User-related commands
 ## Adding new user (name, email, password)
-curl -X POST http://127.0.0.1:5000/user/add/ -H "Content-Type: application/json" -d '{"name": "Jane Smith", "email": "jane.smith@example.com", "password": "password123"}'
+Mac:  
+curl -X POST http://127.0.0.1:5000/user/add/ -H "Content-Type: application/json" -d '{"name": "Jane Smith", "email": "jane.smith@example.com", "password": "password123"}'  
+Windows:  
+curl -X POST http://127.0.0.1:5000/user/add/ -H "Content-Type: application/json" -d "{\"name\": \"Jane Smith\", \"email\": \"jane.smith@example.com\", \"password\": \"password123\"}"
 
 ## UserGroup-related commands
 ## Adding new user to a group (group number)
-curl -X POST http://127.0.0.1:5000/group/1/add/ -H "Content-Type: application/json" -d "{"user_id": 1}"
+Mac:  
+curl -X POST http://127.0.0.1:5000/group/1/add/ -H "Content-Type: application/json" -d "{"user_id": 1}"  
+Windows:  
+curl -X POST http://127.0.0.1:5000/group/1/add/ -H "Content-Type: application/json" -d "{\"user_id\": 1}"
 ## Getting the groups designated tasks
+Mac:  
+curl -X GET http://127.0.0.1:5000/group/1/tasks  
+Windows:  
 curl -X GET http://127.0.0.1:5000/group/1/tasks
 
 ## Group-related commands
 ## Adding new group
-curl -X POST http://127.0.0.1:5000/group -H "Content-Type: application/json" -d "{"name": "Developers"}"
+Mac:  
+curl -X POST http://127.0.0.1:5000/group -H "Content-Type: application/json" -d "{"name": "Developers"}"  
+Windows:  
+curl -X POST http://127.0.0.1:5000/group -H "Content-Type: application/json" -d "{\"name\": \"Developers\"}"
 ## To check members of the group
+Mac:  
+curl -X GET http://127.0.0.1:5000/group/1/members  
+Windows:  
 curl -X GET http://127.0.0.1:5000/group/1/members
 
 ## Task-related commands
 ## Getting all tasks
+Mac:  
+curl -X GET http://127.0.0.1:5000/task/get/  
+Windows:  
 curl -X GET http://127.0.0.1:5000/task/get/
 
 ## Adding a new task
-curl -X POST http://127.0.0.1:5000/group/1/task/add/ -H "Content-Type: application/json" -d "{"title": "Complete project", "description": "Finish the project by end of the week", "status": 1, "deadline": "2025-02-15T00:00:00", "created_at": "2025-02-01T00:00:00", "updated_at": "2025-02-01T00:00:00"}"
-
+Mac:  
+curl -X POST http://127.0.0.1:5000/group/1/task/add/ -H "Content-Type: application/json" -d "{"title": "Complete project", "description": "Finish the project by end of the week", "status": 1, "deadline": "2025-02-15T00:00:00", "created_at": "2025-02-01T00:00:00", "updated_at": "2025-02-01T00:00:00"}"  
+Windows:  
+curl -X POST http://127.0.0.1:5000/group/1/task/add/ -H "Content-Type: application/json" -d "{\"title\": \"Complete project\", \"description\": \"Finish the project by end of the week\", \"status\": 1, \"deadline\": \"2025-02-15T00:00:00\", \"created_at\": \"2025-02-01T00:00:00\", \"updated_at\": \"2025-02-01T00:00:00\"}"
