@@ -24,11 +24,23 @@ We discussed about:
 - 3-4 concepts are enough in this course
 
 ## Meeting 2.
-* **DATE:**
-* **ASSISTANTS:**
+* **DATE:** 13.2.2025 12.00-12.30
+* **ASSISTANTS:** Mika Oja
 
 ### Minutes
 *Summary of what was discussed during the meeting*
+The feedback we received:
+- Delete pycache and instance folders
+- add missing .gitignore
+- modify the table by adding also there the length of passwords etc
+- could users and groups have unique names also? maybe generated unique names? for tasks also!
+- can users belong to multiple groups? yes -> it's not convenient to delete the user also when a group is deleted. Tasks under group that is deleted can be also deleted.
+- change usergroup to many to many
+- add missing "role" variable to usergroup
+- check klikkikomennot populointiin liittyen
+- use pip freeze for requirements.txt to get everything you need there
+- setup tools in flask projects
+- check datetime module for better functions
 
 ### Action points
 *List here the actions points discussed with assistants*
