@@ -31,12 +31,12 @@ We discussed about:
 *Summary of what was discussed during the meeting*
 The feedback we received:
 - Delete pycache and instance folders
-- add missing .gitignore
-- modify the table by adding also there the length of passwords etc
-- could users and groups have unique names also? maybe generated unique names? for tasks also!
+- add missing .gitignore DONE
+- modify the table by adding also there the length of passwords etc THIS IS IMPLEMENTED IN OUR CODE, NOT IN THE PLAN
+- could users and groups have unique names also? maybe generated unique names? for tasks also! GENERATED FOR USER; TASK ; GROUP (UNIQUE USER AT LEAST WORKS)
 - can users belong to multiple groups? yes -> it's not convenient to delete the user also when a group is deleted. Tasks under group that is deleted can be also deleted.
 - change usergroup to many to many
-- add missing "role" variable to usergroup
+- add missing "role" variable to usergroup DONE
 - check klikkikomennot populointiin liittyen
 - use pip freeze for requirements.txt to get everything you need there
 - setup tools in flask projects
