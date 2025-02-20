@@ -20,7 +20,7 @@ class User(db.Model):
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    unique_task(db.String(64), nullable=False, unique=True)
+    unique_task = db.Column(db.String(64), nullable=False, unique=True)
     title = db.Column(db.String(64), nullable=False)
     description = db.Column(db.Text, nullable=False)
     status = db.Column(db.Integer, nullable=False)
@@ -78,6 +78,14 @@ def add_user():
         return jsonify({"message": "User added successfully"}), 201
     
     return "POST method required", 405
+@app.route("/user/get/", methods=["GET"])
+def get_users():
+    if request.method == "GET":
+        users = User.query.all()
+        user_list = [{"id": user.id, "unique_user": user.unique_user, "name": user.name, "email": user.email, "password": user.password} for user in users]
+        return jsonify(user_list), 200
+    return "GET method required", 405
+
 
 # creating group
 @app.route('/group', methods=['POST'])
