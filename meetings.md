@@ -38,9 +38,9 @@ The feedback we received:
 - change usergroup to many to many
 - add missing "role" variable to usergroup DONE
 - check klikkikomennot populointiin liittyen
-- use pip freeze for requirements.txt to get everything you need there
+- use pip freeze for requirements.txt to get everything you need there DONE
 - setup tools in flask projects
-- check datetime module for better functions
+- check datetime module for better functions DONE
 
 ### Action points
 *List here the actions points discussed with assistants*
