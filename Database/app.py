@@ -184,9 +184,9 @@ def add_task(group_id):
             title = request.json["title"]
             description = request.json["description"]
             status = request.json["status"]
-            deadline = datetime.strptime(request.json["deadline"], '%Y-%m-%dT%H:%M:%S')
-            created_at = datetime.strptime(request.json["created_at"], '%Y-%m-%dT%H:%M:%S')
-            updated_at = datetime.strptime(request.json["updated_at"], '%Y-%m-%dT%H:%M:%S')
+            deadline = datetime.fromisoformat(request.json["deadline"])
+            created_at = datetime.fromisoformat(request.json["created_at"])
+            updated_at = datetime.fromisoformat(request.json["updated_at"])
         except KeyError:
             return "Incomplete request - missing information", 400
         
