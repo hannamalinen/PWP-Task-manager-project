@@ -37,10 +37,11 @@ The feedback we received:
 - can users belong to multiple groups? yes -> it's not convenient to delete the user also when a group is deleted. Tasks under group that is deleted can be also deleted.
 - change usergroup to many to many
 - add missing "role" variable to usergroup DONE
-- check klikkikomennot populointiin liittyen
+- check klikkikomennot populointiin liittyen STARTED...
 - use pip freeze for requirements.txt to get everything you need there DONE
-- setup tools in flask projects
+- setup tools in flask projects STARTED...
 - check datetime module for better functions DONE
+- make project structure better STARTED...
 
 ### Action points
 *List here the actions points discussed with assistants*
