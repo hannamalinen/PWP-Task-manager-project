@@ -3,6 +3,19 @@ import hashlib
 from flask.cli import with_appcontext
 from task_manager import db
 
+# from github -> https://github.com/enkwolf/pwp-course-sensorhub-api-example/blob/master/sensorhub/models.py
+class ApiKey(db.Model):
+    
+    key = db.Column(db.String(32), nullable=False, unique=True, primary_key=True)
+    sensor_id = db.Column(db.Integer, db.ForeignKey("sensor.id"), nullable=True)
+    admin =  db.Column(db.Boolean, default=False)
+    
+    sensor = db.relationship("Sensor", uselist=False)
+    
+    @staticmethod
+    def key_hash(key):
+        return hashlib.sha256(key.encode()).digest()
+
 # models from exercise 1
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -11,7 +24,40 @@ class User(db.Model):
     email = db.Column(db.String(64), unique=True, nullable=False)
     password = db.Column(db.String(64), nullable=False)
 
-    user_groups = db.relationship("UserGroup", back_populates="user", cascade="all, delete-orphan")
+    user_groups = db.relationship("UserGroup", back_populates="user")
+
+# from Lovelace -> https://lovelace.oulu.fi/ohjelmoitava-web/ohjelmoitava-web/implementing-rest-apis-with-flask/
+    def serialize(self, short_form=False):
+        doc = {
+            "name" : self.name,
+        }
+        if not short_form:
+            doc["email"] = self.email
+        return doc
+    
+    def deserialize(self, doc):
+        pass
+
+    @staticmethod
+    def json_schema():
+        schema = {
+            "type": "object",
+            "required": ["name", "email", "password"]
+        }
+        props = schema["properties"] = {}
+        props["name"] = {
+            "description": "Name of the user",
+            "type": "string"
+            }
+        props["email"] = {
+            "description": "Email of the user",
+            "type": "string"
+            }
+        props["password"] = {
+            "description": "Password of the user",
+            "type": "string"
+            }
+        return schema
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -22,9 +68,72 @@ class Task(db.Model):
     deadline = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, nullable=True)
     updated_at = db.Column(db.DateTime, nullable=False)
-    usergroup_id = db.Column(db.Integer, db.ForeignKey('user_group.id', ondelete='SET NULL'), nullable=False)  # ondelete='SET NULL' is used to set the foreign key to NULL when the referenced row is deleted
+    usergroup_id = db.Column(db.Integer, db.ForeignKey('user_group.id', ondelete='CASCADE'), nullable=False)  # ondelete='SET NULL' is used to set the foreign key to NULL when the referenced row is deleted
 
     user_group = db.relationship("UserGroup", back_populates="tasks")
+
+# from Lovelace -> https://lovelace.oulu.fi/ohjelmoitava-web/ohjelmoitava-web/implementing-rest-apis-with-flask/
+    def serialize(self, short_form=False):
+        doc = {
+            "title" : self.title,
+            "deadline" : self.deadline,
+            "status" : self.status
+        }
+        if not short_form:
+            doc["description"] = self.description
+            doc["created_at"] = self.created_at
+            doc["updated_at"] = self.updated_at
+            doc["usergroup_id"] = self.usergroup_id
+        return doc
+    
+    def deserialize(self, doc):
+        self.title = doc["title"]
+        self.description = doc["description"]
+        self.status = doc["status"]
+        self.deadline = doc["deadline"]
+        self.created_at = doc["created_at"]
+        self.updated_at = doc["updated_at"]
+        self.usergroup_id = doc["usergroup_id"]
+
+    @staticmethod
+    def json_schema():
+        schema = {
+            "type": "object",
+            "required": ["title", "description", "status", "deadline", "created_at", "updated_at", "usergroup_id"]
+        }
+        props = schema["properties"] = {}
+        props["title"] = {
+            "description": "Title of the task",
+            "type": "string"
+            }
+        props["description"] = {
+            "description": "Description of the task",
+            "type": "string"
+            }
+        props["status"] = {
+            "description": "Status of the task",
+            "type": "integer"
+            }
+        props["deadline"] = {
+            "description": "Deadline of the task",
+            "type": "string",
+            "format": "date-time"
+            }
+        props["created_at"] = {
+            "description": "Creation time of the task",
+            "type": "string",
+            "format": "date-time"
+            }
+        props["updated_at"] = {
+            "description": "Last update time of the task",
+            "type": "string",
+            "format": "date-time"
+            }
+        props["usergroup_id"] = {
+            "description": "User group ID",
+            "type": "integer"
+            }
+        return schema
 
 class Group(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -32,6 +141,12 @@ class Group(db.Model):
     unique_group = db.Column(db.String(64), nullable=False, unique=True)
 
     user_groups = db.relationship("UserGroup", back_populates="groups", cascade="all, delete-orphan")
+
+# from Lovelace -> https://lovelace.oulu.fi/ohjelmoitava-web/ohjelmoitava-web/implementing-rest-apis-with-flask/
+    def serialize(self):
+        return {
+            "name": self.name,
+        }
 
 class UserGroup(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -42,6 +157,25 @@ class UserGroup(db.Model):
     user = db.relationship("User", back_populates="user_groups")
     groups = db.relationship("Group", back_populates="user_groups")
     tasks = db.relationship("Task", back_populates="user_group")
+
+# from Lovelace -> https://lovelace.oulu.fi/ohjelmoitava-web/ohjelmoitava-web/implementing-rest-apis-with-flask/
+    def serialize(self):
+        return {
+            "role": self.role,
+        }
+    
+    @staticmethod
+    def json_schema():
+        schema = {
+            "type": "object",
+            "required": ["role"]
+        }
+        props = schema["properties"] = {}
+        props["role"] = {
+            "description": "Role of the user in the group",
+            "type": "string"
+            }
+        return schema
 
 @click.command("init-db")
 @with_appcontext
