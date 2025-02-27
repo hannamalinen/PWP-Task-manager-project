@@ -15,7 +15,6 @@ class GroupItem(Resource):
             return "Request content type must be JSON", 415
         try:
             name = request.json["name"]
-            unique_group = request.json["unique_group"]
         except KeyError:
             return "Incomplete request - missing name", 400
         new_uuid = str(uuid.uuid4())

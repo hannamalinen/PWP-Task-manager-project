@@ -7,10 +7,7 @@ from task_manager import db
 class ApiKey(db.Model):
     
     key = db.Column(db.String(32), nullable=False, unique=True, primary_key=True)
-    sensor_id = db.Column(db.Integer, db.ForeignKey("sensor.id"), nullable=True)
     admin =  db.Column(db.Boolean, default=False)
-    
-    sensor = db.relationship("Sensor", uselist=False)
     
     @staticmethod
     def key_hash(key):
