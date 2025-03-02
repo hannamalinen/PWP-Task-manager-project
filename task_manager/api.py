@@ -8,7 +8,7 @@ from task_manager.resources.group import GroupItem, GroupMembers, UserToGroup
 api_bp = Blueprint("api", __name__, url_prefix="/api")
 api = Api(api_bp)
 
-api.add_resource(UserItem, "/user/")
+api.add_resource(UserItem, "/user/", "/user/<string:unique_user>/")
 api.add_resource(UserCollection, "/users/") 
 api.add_resource(TaskItem, "/task/<int:group_id>/")
 api.add_resource(TaskCollection, "/task/")

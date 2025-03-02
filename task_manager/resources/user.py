@@ -6,8 +6,16 @@ import uuid
 
 class UserItem(Resource):
 
-    def get(self):
-        pass
+    def get(self, unique_user):
+        user = User.query.filter_by(unique_user=unique_user).first()
+        if not user:
+            return {"error": "User not found"}, 404
+
+        return {
+            "name": user.name,
+            "email": user.email,
+            "unique_user": user.unique_user
+        }, 200
 
     # adding a user
     def post(self):
@@ -31,7 +39,10 @@ class UserItem(Resource):
         db.session.add(user)
         db.session.commit()
 
-        return Response("User added successfully", 201)
+        return {
+            "message": "User added successfully",
+            "unique_user": new_uuid
+        }, 201
     
     # deleting a user
     def delete(self, unique_user):

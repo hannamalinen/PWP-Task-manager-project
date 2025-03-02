@@ -38,6 +38,9 @@ def client():
     #app.test_client_class = AuthHeaderClient
     yield app.test_client()
 
+    with app.app_context():
+        db.session.remove()
+        db.engine.dispose()
     os.close(db_fd)
     os.unlink(db_fname)
 
@@ -89,12 +92,28 @@ class TestUser(object):
         assert resp.status_code == 400
         assert resp.get_json() == "Incomplete request - missing fields"
 
+        # Create a valid user for deletion test
+        resp = client.post(
+            self.RESOURCE_URL,
+            json={
+                "name": "Delete This",
+                "email": "delete.this@gmail.com",
+                "password": "deletethis123"
+            }
+        )
+        assert resp.status_code == 201  # Successful creation
+        user_data = resp.get_json()
+        assert user_data is not None
+        assert "unique_user" in user_data
+        unique_user = user_data["unique_user"]
+
         # Remove user from database
-        resp = client.delete(self.RESOURCE_URL)
+        #unique_user = resp.get_json()["unique_user"]
+        resp = client.delete(f"{self.RESOURCE_URL}{unique_user}/") # copilot suggested this
         assert resp.status_code == 204  # The user was removed
-        resp = client.get(self.RESOURCE_URL)
+        resp = client.get(f"{self.RESOURCE_URL}{unique_user}/")
         assert resp.status_code == 404
-        assert resp.get_json() == "User not found"
+        assert resp.get_json() == {'error': 'User not found'}
 
 class TestGroup(object):
     RESOURCE_URL = "/api/group/"
@@ -104,8 +123,7 @@ class TestGroup(object):
         resp = client.post(
             self.RESOURCE_URL,
             json={
-                "name": "Toimarit",               
-                "unique_group": "toimarit"
+                "name": "Toimarit"
             }
         )
         assert resp.status_code == 201  # Successful creation
@@ -113,11 +131,9 @@ class TestGroup(object):
         # Test invalid group creation
         resp = client.post(
             self.RESOURCE_URL,
-            json={
-                "name": ""
-            }
+            json={"name": True}
         )
         assert resp.status_code == 400
-        assert resp.get_json() == "Incomplete request - missing field"
+        assert resp.get_json() == "Invalid request - name must be a string"
 
 

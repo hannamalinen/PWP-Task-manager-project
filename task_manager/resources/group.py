@@ -15,8 +15,14 @@ class GroupItem(Resource):
             return "Request content type must be JSON", 415
         try:
             name = request.json["name"]
+            if not isinstance(name, str):
+                raise TypeError
         except KeyError:
             return "Incomplete request - missing name", 400
+        except TypeError:
+            return "Invalid request - name must be a string", 400
+        #if not isinstance(name, str):
+        #    return "!Invalid request - name must be a string", 400
         new_uuid = str(uuid.uuid4())
         if Group.query.filter_by(unique_group=new_uuid).first():
             new_uuid = str(uuid.uuid4()) # if the uuid already exists, generate a new one
