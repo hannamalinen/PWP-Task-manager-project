@@ -5,7 +5,7 @@ from flask import Flask
 from flask.testing import FlaskClient
 from werkzeug.datastructures import Headers
 from task_manager import create_app, db
-from models import User, Group, UserGroup, Task, ApiKey
+from task_manager.models import User, Group, UserGroup, Task, ApiKey
 
 TEST_KEY = "tepontarinat"
 

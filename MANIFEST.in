@@ -1,0 +1,2 @@
+graft task_manager/static
+global-exclude *.pyc
