@@ -25,7 +25,7 @@ class GroupItem(Resource):
         db.session.add(group)
         db.session.commit()
 
-        return "Group created successfully", group.id, unique_group, 201
+        return Response("Group added successfully", 201)
 
 
 class GroupMembers(Resource):

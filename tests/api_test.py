@@ -1,3 +1,4 @@
+import uuid
 import pytest
 import tempfile
 import os
@@ -34,7 +35,7 @@ def client():
         db.create_all()
         _populate_db()
 
-    app.test_client_class = AuthHeaderClient
+    #app.test_client_class = AuthHeaderClient
     yield app.test_client()
 
     os.close(db_fd)
@@ -43,12 +44,14 @@ def client():
 def _populate_db():
     for i in range(1, 4):
         user = User(
+            unique_user=str(uuid.uuid4()),
             name=f"Test User {i}",
             email=f"testemail{i}@gmail.com",
             password=f"password{i}"
         )
         group = Group(
-            name=f"Test Group {i}"
+            name=f"Test Group {i}",
+            unique_group=str(uuid.uuid4())
         )
         db.session.add(user)
         db.session.add(group)
@@ -61,7 +64,7 @@ def _populate_db():
     db.session.commit()
 
 class TestUser(object):
-    RESOURCE_URL = "/user/"
+    RESOURCE_URL = "/api/user/"
 
     def test_creating_user(self, client):
         # Test valid user creation
@@ -80,7 +83,6 @@ class TestUser(object):
             self.RESOURCE_URL,
             json={
                 "name": "Teppo Testaaja",
-                "email": "",
                 "password": "teponsalasana123"
             }
         )
@@ -89,13 +91,13 @@ class TestUser(object):
 
         # Remove user from database
         resp = client.delete(self.RESOURCE_URL)
-        assert resp.status_code == 200  # The user was removed
+        assert resp.status_code == 204  # The user was removed
         resp = client.get(self.RESOURCE_URL)
         assert resp.status_code == 404
         assert resp.get_json() == "User not found"
 
 class TestGroup(object):
-    RESOURCE_URL = "/group/"
+    RESOURCE_URL = "/api/group/"
 
     def test_creating_group(self, client):
         # Test valid group creation
@@ -103,7 +105,7 @@ class TestGroup(object):
             self.RESOURCE_URL,
             json={
                 "name": "Toimarit",               
-"unique_group": "toimarit"
+                "unique_group": "toimarit"
             }
         )
         assert resp.status_code == 201  # Successful creation

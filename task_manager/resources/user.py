@@ -31,7 +31,19 @@ class UserItem(Resource):
         db.session.add(user)
         db.session.commit()
 
-        return "User added successfully", 201
+        return Response("User added successfully", 201)
+    
+    # deleting a user
+    def delete(self, unique_user):
+        user = User.query.filter_by(unique_user=unique_user).first()
+
+        if not user:
+            return Response("User not found", 404)
+        
+        db.session.delete(user)
+        db.session.commit()
+
+        return Response(status=204)
     
 class UserCollection(Resource):
 
