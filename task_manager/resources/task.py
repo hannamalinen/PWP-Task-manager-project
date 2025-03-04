@@ -7,13 +7,25 @@ import uuid
 
 class TaskItem(Resource):
 
-    def get(self):
-        pass
+    def get(self, task_id):
+        task = db.session.get(Task, task_id)
+        if not task:
+            return {"error": "Task not found"}, 404
+        return {
+            "id": task.id,
+            "title": task.title,
+            "description": task.description,
+            "status": task.status,
+            "deadline": task.deadline.isoformat(),
+            "created_at": task.created_at.isoformat(),
+            "updated_at": task.updated_at.isoformat(),
+            "usergroup_id": task.usergroup_id
+        }, 200
 
     # adding task to group
     def post(self, group_id):
         if not request.is_json:
-            return "Request content type must be JSON", 415
+            return {"error": "Request content type must be JSON"}, 415
         try:
             title = request.json["title"]
             description = request.json["description"]
@@ -22,15 +34,15 @@ class TaskItem(Resource):
             created_at = datetime.fromisoformat(request.json["created_at"])
             updated_at = datetime.fromisoformat(request.json["updated_at"])
         except KeyError:
-            return "Incomplete request - missing information", 400
+            return {"error": "Incomplete request - missing information"}, 400
         
-        group = Group.query.get(group_id)
+        group = db.session.get(Group, group_id)
         if not group:
-            return jsonify({"error": "Group not found"}), 404
+            return {"error": "Group not found"}, 404
         
         user_group = UserGroup.query.filter_by(group_id=group_id).first()
         if not user_group:
-            return jsonify({"error": "UserGroup not found for the given group"}), 404
+            return {"error": "UserGroup not found for the given group"}, 404
         
         usergroup_id = user_group.id
         new_uuid = str(uuid.uuid4())
@@ -38,7 +50,7 @@ class TaskItem(Resource):
             new_uuid = str(uuid.uuid4())
 
         if Task.query.filter_by(title=title, usergroup_id=usergroup_id).first():
-            return "Task already exists", 400
+            return {"error": "Task already exists"}, 400
         task = Task(
             unique_task=new_uuid, 
             title=title, 
@@ -51,15 +63,18 @@ class TaskItem(Resource):
             )
         db.session.add(task)
         db.session.commit()
-        return "Task added successfully", 201
+        return {
+            "message": "Task added successfully",
+            "id": task.id
+        }, 201
 
     def put(self, task_id):
         if not request.is_json:
-            return "Request content type must be JSON", 415
+            return {"error": "Request content type must be JSON"}, 415
         data = request.get_json()
-        task = Task.query.get(task_id)
+        task = db.session.get(Task, task_id)
         if not task:
-            return jsonify({"error": "Task not found"}), 404
+            return {"error": "Task not found"}, 404
         if "title" in data:
             task.title = data["title"]
         if "description" in data:
@@ -70,11 +85,12 @@ class TaskItem(Resource):
             try:
                 task.deadline = datetime.fromisoformat(data["deadline"])
             except ValueError:
-                return jsonify({"error": "Invalid deadline format. Use ISO format (YYYY-MM-DDTHH:MM:SS)"}), 400
+                return {"error": "Invalid deadline format. Use ISO format (YYYY-MM-DDTHH:MM:SS)"}, 400
+        # copilot helped with isoformat thing - the datetime was not working properly
 
         task.updated_at = datetime.now()
         db.session.commit()
-        return jsonify({"message": "Task updated successfully"}), 200
+        return {"message": "Task updated successfully"}, 200
     
 class TaskCollection(Resource):
 
@@ -85,11 +101,12 @@ class TaskCollection(Resource):
                       "title": task.title, 
                       "description": task.description, 
                       "status": task.status, 
-                      "deadline": task.deadline, 
-                      "created_at": task.created_at, 
-                      "updated_at": task.updated_at, 
+                      "deadline": task.deadline.isoformat(), 
+                      "created_at": task.created_at.isoformat(), 
+                      "updated_at": task.updated_at.isoformat(), 
                       "usergroup_id": task.usergroup_id} for task in tasks]
         return task_list, 200
+    # copilot helped with isoformat thing - the datetime was not working properly
 
     def post(self):
         pass
@@ -98,9 +115,9 @@ class GroupTaskCollection(Resource):
 
     # getting group tasks
     def get(self, group_id):
-        group = Group.query.get(group_id)
+        group = db.session.get(Group, group_id)
         if not group:
-            return jsonify({"error": "Group not found"}), 404
+            return {"error": "Group not found"}, 404
         user_groups = UserGroup.query.filter_by(group_id=group_id).all()
         usergroup_ids = [ug.id for ug in user_groups]
         tasks = Task.query.filter(Task.usergroup_id.in_(usergroup_ids)).all()
@@ -109,8 +126,9 @@ class GroupTaskCollection(Resource):
             "title": task.title,
             "description": task.description,
             "status": task.status,
-            "deadline": task.deadline,
-            "created_at": task.created_at,
-            "updated_at": task.updated_at,
+            "deadline": task.deadline.isoformat(),
+            "created_at": task.created_at.isoformat(),
+            "updated_at": task.updated_at.isoformat(),
             "usergroup_id": task.usergroup_id
-        } for task in tasks]
+        } for task in tasks], 200
+        # copilot helped with isoformat thing - the datetime was not working properly

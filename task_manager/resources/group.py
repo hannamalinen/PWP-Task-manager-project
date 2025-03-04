@@ -7,6 +7,7 @@ import json
 
 class GroupItem(Resource):
 
+    # getting group
     def get(self, group_id):
         group = db.session.get(Group, group_id)
         if not group:
@@ -20,15 +21,15 @@ class GroupItem(Resource):
     # creating group
     def post(self):
         if not request.is_json:
-            return "Request content type must be JSON", 415
+            return {"error": "Request content type must be JSON"}, 415
         try:
             name = request.json["name"]
             if not isinstance(name, str):
                 raise TypeError
         except KeyError:
-            return "Incomplete request - missing name", 400
+            return {"error": "Incomplete request - missing name"}, 400
         except TypeError:
-            return "Invalid request - name must be a string", 400
+            return {"error": "Invalid request - name must be a string"}, 400
         new_uuid = str(uuid.uuid4())
         if Group.query.filter_by(unique_group=new_uuid).first():
             new_uuid = str(uuid.uuid4())
@@ -37,14 +38,20 @@ class GroupItem(Resource):
         db.session.add(group)
         db.session.commit()
 
+        # create usergroup entry for the group
+        user_group = UserGroup(user_id=1, group_id=group.id, role="admin")  # Assuming user_id=1 is the admin
+        db.session.add(user_group)
+        db.session.commit()
+
         response_data = {
             "message": "Group added successfully",
             "group_id": group.id,
             "unique_group": group.unique_group
         }
 
-        return Response(json.dumps(response_data), status=201, mimetype="application/json")
+        return response_data, 201
 
+    # updating group information
     def put(self, group_id):
         if not request.is_json:
             return "Request content type must be JSON", 415
@@ -77,33 +84,38 @@ class GroupMembers(Resource):
             "name": member.user.name,
             "email": member.user.email,
             "role": member.role
-        } for member in members]
+        } for member in members], 200
     
 class UserToGroup(Resource):
     
     # adding user to group
     def post(self, group_id):
         if not request.is_json:
-            return "Request content type must be JSON", 415
+            return {"error": "Request content type must be JSON"}, 415
         try:
             user_id = request.json["user_id"]
             role = request.json["role"]
         except KeyError:
-            return "Incomplete request - missing fields", 400
+            return {"error": "Incomplete request - missing fields"}, 400
         
         group = db.session.get(Group, group_id)
         if not group:
-            return jsonify({"error": "Group not found"}), 404
+            return {"error": "Group not found"}, 404
 
-        user = db.session.get(User, user_id)
+        user = User.query.filter_by(unique_user=user_id).first()
         if not user:
-            return jsonify({"error": "User not found"}), 404
+            # debug information - copilot created this line while helping us debug
+            print(f"User not found: {user_id}")
+            return {"error": "User not found"}, 404
 
-        if UserGroup.query.filter_by(user_id=user_id, group_id=group_id).first():
-            return jsonify({"error": "User already in group"}), 400
+        # debug information - copilot created this line while helping us debug
+        print(f"Adding User ID: {user_id} to Group ID: {group_id}")
 
-        user_group = UserGroup(user_id=user_id, group_id=group_id, role=role)
+        if UserGroup.query.filter_by(user_id=user.id, group_id=group_id).first():
+            return {"error": "User already in group"}, 400
+
+        user_group = UserGroup(user_id=user.id, group_id=group_id, role=role)
         db.session.add(user_group)
         db.session.commit()
 
-        return "User added to group successfully", 201
+        return {"message": "User added to group successfully"}, 201
