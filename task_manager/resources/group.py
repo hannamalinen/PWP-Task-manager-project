@@ -1,13 +1,21 @@
-from flask import request, Response, url_for, jsonify
+from flask import request, Response, jsonify
 from flask_restful import Resource
 from task_manager.models import Group, User, UserGroup
 from task_manager import db
 import uuid
+import json
 
 class GroupItem(Resource):
 
-    def get(self):
-        pass
+    def get(self, group_id):
+        group = db.session.get(Group, group_id)
+        if not group:
+            return {"error": "Group not found"}, 404
+        return {
+            "id": group.id,
+            "name": group.name,
+            "unique_group": group.unique_group
+        }, 200
 
     # creating group
     def post(self):
@@ -29,30 +37,38 @@ class GroupItem(Resource):
         db.session.add(group)
         db.session.commit()
 
-        return Response("Group added successfully", 201)
+        response_data = {
+            "message": "Group added successfully",
+            "group_id": group.id,
+            "unique_group": group.unique_group
+        }
+
+        return Response(json.dumps(response_data), status=201, mimetype="application/json")
 
     def put(self, group_id):
         if not request.is_json:
             return "Request content type must be JSON", 415
         data = request.get_json()
-        group = Group.query.get(group_id)
+        group = db.session.get(Group, group_id)
         if not group:
-            return jsonify({"error": "Group not found"}), 404
+            return "Error: Group not found", 404
         if "name" in data:
             group.name = data["name"]
         if "unique_group" in data:
             if Group.query.filter_by(unique_group=data["unique_group"]).first():
-                return jsonify({"error": "unique_group already exists"}), 400
+                return "Error: unique_group already exists", 400
             group.unique_group = data["unique_group"]
 
         db.session.commit()
-        return jsonify({"message": "Group updated successfully"}), 200
+        return {
+            "message": "Group updated successfully"
+        }, 200
 
 class GroupMembers(Resource):
 
     # getting group members 
     def get(self, group_id):
-        group = Group.query.get(group_id)
+        group = db.session.get(Group, group_id)
         if not group:
             return {"error": "Group not found"}, 404
         members = group.user_groups
@@ -61,7 +77,7 @@ class GroupMembers(Resource):
             "name": member.user.name,
             "email": member.user.email,
             "role": member.role
-            } for member in members]
+        } for member in members]
     
 class UserToGroup(Resource):
     
@@ -75,11 +91,11 @@ class UserToGroup(Resource):
         except KeyError:
             return "Incomplete request - missing fields", 400
         
-        group = Group.query.get(group_id)
+        group = db.session.get(Group, group_id)
         if not group:
             return jsonify({"error": "Group not found"}), 404
 
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         if not user:
             return jsonify({"error": "User not found"}), 404
 

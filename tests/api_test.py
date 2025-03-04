@@ -170,3 +170,36 @@ class TestGroup(object):
         )
         assert resp.status_code == 400
         assert resp.get_json() == "Invalid request - name must be a string"
+
+    def test_updating_group(self, client):
+        # Create a group to update
+        resp = client.post(
+            self.RESOURCE_URL,
+            json={
+                "name": "Update Group",
+                "unique_group": "update-group-uuid"
+            }
+        )
+        assert resp.status_code == 201  # Successful creation
+        group_data = resp.get_json()
+        assert group_data is not None, "Failed to create group"
+        assert "group_id" in group_data, "Response does not contain group_id"
+        group_id = group_data["group_id"]
+
+        # Update the group's information
+        resp = client.put(
+            f"{self.RESOURCE_URL}{group_id}/",
+            json={
+                "name": "Updated Group Name",
+                "unique_group": "updated-unique-group"
+            }
+        )
+        assert resp.status_code == 200  # Successful update
+        assert resp.get_json() == {"message": "Group updated successfully"}
+
+        # Verify the update
+        resp = client.get(f"{self.RESOURCE_URL}{group_id}/")
+        assert resp.status_code == 200
+        updated_group_data = resp.get_json()
+        assert updated_group_data["name"] == "Updated Group Name"
+        assert updated_group_data["unique_group"] == "updated-unique-group"
