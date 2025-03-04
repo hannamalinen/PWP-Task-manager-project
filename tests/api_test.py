@@ -13,6 +13,7 @@ TEST_KEY = "tepontarinat"
 # from github /tests/resource_test.py
 # https://github.com/enkwolf/pwp-course-sensorhub-api-example/blob/master/tests/resource_test.py
 class AuthHeaderClient(FlaskClient):
+    """A test client that adds the task-manager-api-key header to all requests"""
     def open(self, *args, **kwargs):
         api_key_headers = Headers({
             'task-manager-api-key': TEST_KEY
@@ -24,6 +25,7 @@ class AuthHeaderClient(FlaskClient):
 
 @pytest.fixture
 def client():
+    """Create a test client for the app"""
     db_fd, db_fname = tempfile.mkstemp()
     config = {
         "SQLALCHEMY_DATABASE_URI": "sqlite:///" + db_fname,
@@ -46,6 +48,7 @@ def client():
     os.unlink(db_fname)
 
 def _populate_db():
+    """Populate the database with test data"""
     for i in range(1, 4):
         user = User(
             unique_user=str(uuid.uuid4()),
@@ -68,6 +71,7 @@ def _populate_db():
     db.session.commit()
 
 class TestUser(object):
+    """Test the User resource"""
     RESOURCE_URL = "/api/user/"
 
     def test_creating_user(self, client):
@@ -532,7 +536,6 @@ class TestTask(object):
         )
         assert_group_message = group_resp.get_data(as_text=True)
         message = f"Group creation failed: {assert_group_message}"
-      
         assert group_resp.status_code == 201, message
         group_data = group_resp.get_json()
         group_id = group_data["group_id"]
@@ -552,7 +555,6 @@ class TestTask(object):
             create_task_message = task_resp.get_data(as_text=True)
             message = f"Task creation failed: {create_task_message}"
             assert task_resp.status_code == 201, message
-   
         # test getting tasks for the group
         resp = client.get(f"/api/group/{group_id}/tasks/")
         assert resp.status_code == 200, f"Task retrieval failed: {resp.get_data(as_text=True)}"
