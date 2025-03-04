@@ -52,6 +52,29 @@ class TaskItem(Resource):
         db.session.add(task)
         db.session.commit()
         return "Task added successfully", 201
+
+    def put(self, task_id):
+        if not request.is_json:
+            return "Request content type must be JSON", 415
+        data = request.get_json()
+        task = Task.query.get(task_id)
+        if not task:
+            return jsonify({"error": "Task not found"}), 404
+        if "title" in data:
+            task.title = data["title"]
+        if "description" in data:
+            task.description = data["description"]
+        if "status" in data:
+            task.status = data["status"]
+        if "deadline" in data:
+            try:
+                task.deadline = datetime.fromisoformat(data["deadline"])
+            except ValueError:
+                return jsonify({"error": "Invalid deadline format. Use ISO format (YYYY-MM-DDTHH:MM:SS)"}), 400
+
+        task.updated_at = datetime.now()
+        db.session.commit()
+        return jsonify({"message": "Task updated successfully"}), 200
     
 class TaskCollection(Resource):
 

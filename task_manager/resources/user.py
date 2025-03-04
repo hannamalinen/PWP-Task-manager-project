@@ -43,6 +43,25 @@ class UserItem(Resource):
             "message": "User added successfully",
             "unique_user": new_uuid
         }, 201
+
+    def put(self, unique_user):
+        if not request.is_json:
+            return "Request content type must be JSON", 415
+        data = request.get_json()
+        user = User.query.filter_by(unique_user=unique_user).first()
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+        if "name" in data:
+            user.name = data["name"]
+        if "email" in data:
+            user.email = data["email"]
+        if "password" in data:
+            user.password = data["password"]
+
+        db.session.commit()
+        return {
+            "message": "User updated successfully"       
+        }, 200
     
     # deleting a user
     def delete(self, unique_user):
@@ -66,3 +85,4 @@ class UserCollection(Resource):
                       "email": user.email, 
                       "password": user.password} for user in users]
         return user_list, 200
+

@@ -115,6 +115,41 @@ class TestUser(object):
         assert resp.status_code == 404
         assert resp.get_json() == {'error': 'User not found'}
 
+    def test_updating_user(self, client):
+        # Create a user to update
+        resp = client.post(
+            self.RESOURCE_URL,
+            json={
+                "name": "Update Me",
+                "email": "update.me@gmail.com",
+                "password": "updateme123"
+            }
+        )
+        assert resp.status_code == 201  # Successful creation
+        user_data = resp.get_json()
+        assert user_data is not None
+        assert "unique_user" in user_data
+        unique_user = user_data["unique_user"]
+
+        # Update the user's information
+        resp = client.put(
+            f"{self.RESOURCE_URL}{unique_user}/",
+            json={
+                "name": "Updated Name",
+                "email": "updated.email@gmail.com",
+                "password": "updatedpassword123"
+            }
+        )
+        assert resp.status_code == 200  # Successful update
+        assert resp.get_json() == {"message": "User updated successfully"}
+
+        # Verify the update
+        resp = client.get(f"{self.RESOURCE_URL}{unique_user}/")
+        assert resp.status_code == 200
+        updated_user_data = resp.get_json()
+        assert updated_user_data["name"] == "Updated Name"
+        assert updated_user_data["email"] == "updated.email@gmail.com"
+
 class TestGroup(object):
     RESOURCE_URL = "/api/group/"
 
@@ -135,5 +170,3 @@ class TestGroup(object):
         )
         assert resp.status_code == 400
         assert resp.get_json() == "Invalid request - name must be a string"
-
-

@@ -21,11 +21,9 @@ class GroupItem(Resource):
             return "Incomplete request - missing name", 400
         except TypeError:
             return "Invalid request - name must be a string", 400
-        #if not isinstance(name, str):
-        #    return "!Invalid request - name must be a string", 400
         new_uuid = str(uuid.uuid4())
         if Group.query.filter_by(unique_group=new_uuid).first():
-            new_uuid = str(uuid.uuid4()) # if the uuid already exists, generate a new one
+            new_uuid = str(uuid.uuid4())
 
         group = Group(name=name, unique_group=new_uuid)
         db.session.add(group)
@@ -33,6 +31,22 @@ class GroupItem(Resource):
 
         return Response("Group added successfully", 201)
 
+    def put(self, group_id):
+        if not request.is_json:
+            return "Request content type must be JSON", 415
+        data = request.get_json()
+        group = Group.query.get(group_id)
+        if not group:
+            return jsonify({"error": "Group not found"}), 404
+        if "name" in data:
+            group.name = data["name"]
+        if "unique_group" in data:
+            if Group.query.filter_by(unique_group=data["unique_group"]).first():
+                return jsonify({"error": "unique_group already exists"}), 400
+            group.unique_group = data["unique_group"]
+
+        db.session.commit()
+        return jsonify({"message": "Group updated successfully"}), 200
 
 class GroupMembers(Resource):
 
