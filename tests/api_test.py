@@ -1,13 +1,12 @@
 import uuid
-import pytest
-import tempfile
-import os
 import time
-from flask import Flask
+import os
+import tempfile
+import pytest
 from flask.testing import FlaskClient
 from werkzeug.datastructures import Headers
 from task_manager import create_app, db
-from task_manager.models import User, Group, UserGroup, Task, ApiKey
+from task_manager.models import User, Group, ApiKey
 
 TEST_KEY = "tepontarinat"
 
@@ -188,7 +187,8 @@ class TestUser(object):
         resp = client.get("/api/users/")
         assert resp.status_code == 200, f"User retrieval failed: {resp.get_data(as_text=True)}"
         users = resp.get_json()
-        assert len(users) == 6, "Expected 6 users"  # Including the initial 3 users created in _populate_db
+        assert len(users) == 6, "Expected 6 users"
+        # Including the initial 3 users created in _populate_db
         # copilot created this thing above to help debug the test
 
 class TestGroup(object):
@@ -267,7 +267,8 @@ class TestGroup(object):
             self.RESOURCE_URL,
             json={"name": "Members Group"}
         )
-        assert group_resp.status_code == 201, f"Group creation failed: {group_resp.get_data(as_text=True)}"
+        resp_message = group_resp.get_data(as_text=True)
+        assert group_resp.status_code == 201, f"Group creation failed: {resp_message}"
         group_data = group_resp.get_json()
         group_id = group_data["group_id"]
 
@@ -279,16 +280,20 @@ class TestGroup(object):
                 "password": "memberpassword"
             }
         )
-        assert user_resp.status_code == 201, f"User creation failed: {user_resp.get_data(as_text=True)}"
+        resp_message = group_resp.get_data(as_text=True)
+        assert user_resp.status_code == 201, f"User creation failed: {resp_message}"
         user_data = user_resp.get_json()
-        assert "unique_user" in user_data, f"User creation response does not contain 'unique_user': {user_resp.get_data(as_text=True)}"
+        resp_user_message = user_resp.get_data(as_text=True)
+        user_creation_message = "User creation failed: {resp_user_message}"
+        assert "unique_user" in user_data, user_creation_message
         user_id = user_data["unique_user"]
 
         # add user to the db
         with client.application.app_context():
             db.session.commit()
 
-        # a delay to allow the database to process the commit - copilot created this to help debug the test
+        # a delay to allow the database to process the commit
+        # copilot created this to help debug the test
         time.sleep(1)
 
         # debug information - copilot created this to help debug the test
@@ -298,13 +303,16 @@ class TestGroup(object):
             f"/api/group/{group_id}/user/",
             json={"user_id": user_id, "role": "member"}
         )
-        assert add_user_resp.status_code == 201, f"Adding user to group failed: {add_user_resp.get_data(as_text=True)}"
-
+        resp_add_user_message = add_user_resp.get_data(as_text=True)
+        assert_message = f"Adding user to group failed: {resp_add_user_message}"
+        assert add_user_resp.status_code == 201, assert_message
         # test getting group members
         resp = client.get(f"{self.RESOURCE_URL}{group_id}/members/")
-        assert resp.status_code == 200, f"Group members retrieval failed: {resp.get_data(as_text=True)}"
+        assert_message = f"Group members retrieval failed: {resp.get_data(as_text=True)}"
+        assert resp.status_code == 200, assert_message
         members = resp.get_json()
-        assert len(members) == 2, "Expected 2 members"  # copilot created this to help debug the test
+        # copilot created this to help debug the test
+        assert len(members) == 2, "Expected 2 members"
         assert any(member["name"] == "Member User" for member in members)
 
     def test_add_user_to_group(self, client):
@@ -313,7 +321,8 @@ class TestGroup(object):
             self.RESOURCE_URL,
             json={"name": "Add User Group"}
         )
-        assert group_resp.status_code == 201, f"Group creation failed: {group_resp.get_data(as_text=True)}"
+        assert_group_message = group_resp.get_data(as_text=True)
+        assert group_resp.status_code == 201, f"Group creation failed: {assert_group_message}"
         group_data = group_resp.get_json()
         group_id = group_data["group_id"]
 
@@ -325,16 +334,20 @@ class TestGroup(object):
                 "password": "adduserpassword"
             }
         )
-        assert user_resp.status_code == 201, f"User creation failed: {user_resp.get_data(as_text=True)}"
+        assert_user_message = user_resp.get_data(as_text=True)
+        assert user_resp.status_code == 201, f"User creation failed: {assert_user_message}"
         user_data = user_resp.get_json()
-        assert "unique_user" in user_data, f"User creation response does not contain 'unique_user': {user_resp.get_data(as_text=True)}"
+        assert_user_data_message = {user_resp.get_data(as_text=True)}
+        message = f"User creation failed: {assert_user_data_message}"
+        assert "unique_user" in user_data, message
         user_id = user_data["unique_user"]
 
         # commit the user to the database
         with client.application.app_context():
             db.session.commit()
 
-        # a delay to allow the database to process the commit - copilot created this to help debug the test
+        # a delay to allow the database to process the commit
+        # - copilot created this to help debug the test
         time.sleep(1)
 
         # debug information  - copilot created this to help debug the test
@@ -345,19 +358,22 @@ class TestGroup(object):
             f"/api/group/{group_id}/user/",
             json={"user_id": user_id, "role": "member"}
         )
-        assert resp.status_code == 201, f"Adding user to group failed: {resp.get_data(as_text=True)}"
+        user_id_message = resp.get_data(as_text=True)
+        message = f"Adding user to group failed: {user_id_message}"
+        assert resp.status_code == 201, message
         assert resp.get_json() == {"message": "User added to group successfully"}
 
 class TestTask(object):
     RESOURCE_URL = "/api/task/"
 
     def test_create_task(self, client):
-        # create group to put the task with 
+        # create group to put the task with
         group_resp = client.post(
             "/api/group/",
             json={"name": "Task Group"}
         )
-        assert group_resp.status_code == 201, f"Group creation failed: {group_resp.get_data(as_text=True)}"
+        task_group_message = group_resp.get_data(as_text=True)
+        assert group_resp.status_code == 201, f"Group creation failed: {task_group_message}"
         group_data = group_resp.get_json()
         group_id = group_data["group_id"]
 
@@ -373,7 +389,9 @@ class TestTask(object):
                 "updated_at": "2023-01-01T00:00:00"
             }
         )
-        assert resp.status_code == 201, f"Task creation failed: {resp.get_data(as_text=True)}"
+        task_creation_message = resp.get_data(as_text=True)
+        task_message = f"Task creation failed: {task_creation_message}"
+        assert resp.status_code == 201, task_message
         task_data = resp.get_json()
         assert "id" in task_data, "Task creation response does not contain 'id'"
 
@@ -383,7 +401,9 @@ class TestTask(object):
             "/api/group/",
             json={"name": "Task Group"}
         )
-        assert group_resp.status_code == 201, f"Group creation failed: {group_resp.get_data(as_text=True)}"
+        get_task_message = group_resp.get_data(as_text=True)
+        message = f"Group creation failed: {get_task_message}"
+        assert group_resp.status_code == 201, message
         group_data = group_resp.get_json()
         group_id = group_data["group_id"]
 
@@ -398,14 +418,18 @@ class TestTask(object):
                 "updated_at": "2023-01-01T00:00:00"
             }
         )
-        assert task_resp.status_code == 201, f"Task creation failed: {task_resp.get_data(as_text=True)}"
+        create_task_message = task_resp.get_data(as_text=True)
+        message = f"Task creation failed: {create_task_message}"
+        assert task_resp.status_code == 201, message
         task_data = task_resp.get_json()
         assert "id" in task_data, "Task creation response does not contain 'id'"
         task_id = task_data["id"]
 
         # test getting the task
         resp = client.get(f"{self.RESOURCE_URL}{task_id}/")
-        assert resp.status_code == 200, f"Task retrieval failed: {resp.get_data(as_text=True)}"
+        get_task_message = resp.get_data(as_text=True)
+        message = f"Task retrieval failed: {get_task_message}"
+        assert resp.status_code == 200, message
         retrieved_task = resp.get_json()
         assert retrieved_task["title"] == "New Task"
         assert retrieved_task["description"] == "Task description"
@@ -416,7 +440,9 @@ class TestTask(object):
             "/api/group/",
             json={"name": "Task Group"}
         )
-        assert group_resp.status_code == 201, f"Group creation failed: {group_resp.get_data(as_text=True)}"
+        update_task_message = group_resp.get_data(as_text=True)
+        message = f"Group creation failed: {update_task_message}"
+        assert group_resp.status_code == 201, message
         group_data = group_resp.get_json()
         group_id = group_data["group_id"]
 
@@ -431,7 +457,9 @@ class TestTask(object):
                 "updated_at": "2023-01-01T00:00:00"
             }
         )
-        assert task_resp.status_code == 201, f"Task creation failed: {task_resp.get_data(as_text=True)}"
+        task_creation_message = task_resp.get_data(as_text=True)
+        message = f"Task creation failed: {task_creation_message}"
+        assert task_resp.status_code == 201, message
         task_data = task_resp.get_json()
         assert "id" in task_data, "Task creation response does not contain 'id'"
         task_id = task_data["id"]
@@ -451,7 +479,9 @@ class TestTask(object):
 
         # update
         resp = client.get(f"{self.RESOURCE_URL}{task_id}/")
-        assert resp.status_code == 200, f"Task retrieval failed: {resp.get_data(as_text=True)}"
+        update_task_message = resp.get_data(as_text=True)
+        message = f"Task retrieval failed: {update_task_message}"
+        assert resp.status_code == 200, message
         updated_task = resp.get_json()
         assert updated_task["title"] == "Updated Task"
         assert updated_task["description"] == "Updated description"
@@ -463,7 +493,9 @@ class TestTask(object):
             "/api/group/",
             json={"name": "Task Group"}
         )
-        assert group_resp.status_code == 201, f"Group creation failed: {group_resp.get_data(as_text=True)}"
+        get_all_tasks_message = group_resp.get_data(as_text=True)
+        message = f"Group creation failed: {get_all_tasks_message}"
+        assert group_resp.status_code == 201, message
         group_data = group_resp.get_json()
         group_id = group_data["group_id"]
 
@@ -479,11 +511,15 @@ class TestTask(object):
                     "updated_at": "2023-01-01T00:00:00"
                 }
             )
-            assert task_resp.status_code == 201, f"Task creation failed: {task_resp.get_data(as_text=True)}"
+            create_task_message = task_resp.get_data(as_text=True)
+            message = f"Task creation failed: {create_task_message}"
+            assert task_resp.status_code == 201, message
 
         # test getting all tasks
         resp = client.get(self.RESOURCE_URL)
-        assert resp.status_code == 200, f"Task retrieval failed: {resp.get_data(as_text=True)}"
+        get_all_tasks_message = resp.get_data(as_text=True)
+        message = f"Task retrieval failed: {get_all_tasks_message}"
+        assert resp.status_code == 200, message
         tasks = resp.get_json()
         assert len(tasks) == 3, "Expected 3 tasks"
         # copilot created this thing above to help debug the test
@@ -494,7 +530,10 @@ class TestTask(object):
             "/api/group/",
             json={"name": "Task Group"}
         )
-        assert group_resp.status_code == 201, f"Group creation failed: {group_resp.get_data(as_text=True)}"
+        assert_group_message = group_resp.get_data(as_text=True)
+        message = f"Group creation failed: {assert_group_message}"
+      
+        assert group_resp.status_code == 201, message
         group_data = group_resp.get_json()
         group_id = group_data["group_id"]
 
@@ -510,8 +549,10 @@ class TestTask(object):
                     "updated_at": "2023-01-01T00:00:00"
                 }
             )
-            assert task_resp.status_code == 201, f"Task creation failed: {task_resp.get_data(as_text=True)}"
-
+            create_task_message = task_resp.get_data(as_text=True)
+            message = f"Task creation failed: {create_task_message}"
+            assert task_resp.status_code == 201, message
+   
         # test getting tasks for the group
         resp = client.get(f"/api/group/{group_id}/tasks/")
         assert resp.status_code == 200, f"Task retrieval failed: {resp.get_data(as_text=True)}"
