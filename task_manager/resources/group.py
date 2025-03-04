@@ -1,14 +1,19 @@
-from flask import request, Response, jsonify
+"""This module contains the resources classes for the Group model."""
+
+import uuid
+from flask import request
 from flask_restful import Resource
 from task_manager.models import Group, User, UserGroup
 from task_manager import db
-import uuid
-import json
+
+
 
 class GroupItem(Resource):
+    " Resource class for get, post, put methods for Group"
 
     # getting group
     def get(self, group_id):
+        """Get a group by its ID."""
         group = db.session.get(Group, group_id)
         if not group:
             return {"error": "Group not found"}, 404
@@ -20,6 +25,7 @@ class GroupItem(Resource):
 
     # creating group
     def post(self):
+        "Creates a new group, name and unique uuid is created"  
         if not request.is_json:
             return {"error": "Request content type must be JSON"}, 415
         try:
@@ -39,7 +45,8 @@ class GroupItem(Resource):
         db.session.commit()
 
         # create usergroup entry for the group
-        user_group = UserGroup(user_id=1, group_id=group.id, role="admin")  # Assuming user_id=1 is the admin
+         # Assuming user_id=1 is the admin user
+        user_group = UserGroup(user_id=1, group_id=group.id, role="admin")
         db.session.add(user_group)
         db.session.commit()
 
@@ -53,6 +60,7 @@ class GroupItem(Resource):
 
     # updating group information
     def put(self, group_id):
+        """Updates a group information of an existing group"""
         if not request.is_json:
             return "Request content type must be JSON", 415
         data = request.get_json()
@@ -72,9 +80,10 @@ class GroupItem(Resource):
         }, 200
 
 class GroupMembers(Resource):
-
-    # getting group members 
+    "Resource class for get method for GroupMembers"
+    # getting group members
     def get(self, group_id):
+        """Get all members of a group by group ID."""
         group = db.session.get(Group, group_id)
         if not group:
             return {"error": "Group not found"}, 404
@@ -85,11 +94,12 @@ class GroupMembers(Resource):
             "email": member.user.email,
             "role": member.role
         } for member in members], 200
-    
+
 class UserToGroup(Resource):
-    
+    "Resource class for post method for UserToGroup"
     # adding user to group
     def post(self, group_id):
+        """Add a user to a group."""
         if not request.is_json:
             return {"error": "Request content type must be JSON"}, 415
         try:
@@ -97,7 +107,7 @@ class UserToGroup(Resource):
             role = request.json["role"]
         except KeyError:
             return {"error": "Incomplete request - missing fields"}, 400
-        
+
         group = db.session.get(Group, group_id)
         if not group:
             return {"error": "Group not found"}, 404

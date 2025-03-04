@@ -1,13 +1,17 @@
-from flask import request, Response, url_for, jsonify
+"""This module contains the User resource class and its methods"""
+import uuid
+from flask import request
 from flask_restful import Resource
 from task_manager.models import User
 from task_manager import db
-import uuid
+
 
 class UserItem(Resource):
+    " Resource class for get, post, put, delete methods for User"
 
     # getting a user
     def get(self, unique_user):
+        """Get a user by its unique id"""
         user = User.query.filter_by(unique_user=unique_user).first()
         if not user:
             return {"error": "User not found"}, 404
@@ -18,8 +22,8 @@ class UserItem(Resource):
             "unique_user": user.unique_user
         }, 200
 
-    # adding a user
     def post(self):
+        "Creates a new user, with name, email and password"
         if not request.is_json:
             return {"error": "Request content type must be JSON"}, 415
         try:
@@ -28,14 +32,12 @@ class UserItem(Resource):
             password = request.json["password"]
         except KeyError:
             return {"error": "Incomplete request - missing fields"}, 400
-        
         new_uuid = str(uuid.uuid4())
         if User.query.filter_by(unique_user=new_uuid).first():
-            new_uuid = str(uuid.uuid4()) # if the uuid already exists, generate a new one
-        
+# if the uuid already exists, generate a new one
+            new_uuid = str(uuid.uuid4())
         if User.query.filter_by(email=email).first():
             return {"error": "Email is already in use"}, 400
-        
         user = User(name=name, unique_user=new_uuid, email=email, password=password)
         db.session.add(user)
         db.session.commit()
@@ -45,8 +47,10 @@ class UserItem(Resource):
             "unique_user": new_uuid
         }, 201
 
-    # updating a user information
     def put(self, unique_user):
+
+        "Updates a user's information"
+
         if not request.is_json:
             return {"error": "Request content type must be JSON"}, 415
         data = request.get_json()
@@ -64,28 +68,30 @@ class UserItem(Resource):
         return {
             "message": "User updated successfully"       
         }, 200
-    
-    # deleting a user
-    def delete(self, unique_user):
-        user = User.query.filter_by(unique_user=unique_user).first()
 
+    def delete(self, unique_user):
+
+        "Deletes a user"
+
+        user = User.query.filter_by(unique_user=unique_user).first()
         if not user:
             return {"error": "User not found"}, 404
-        
+
         db.session.delete(user)
         db.session.commit()
 
         return {}, 204
-    
+
 class UserCollection(Resource):
 
-    # getting all users
+    "Resource class for get method for UserCollection"
+
     def get(self):
+        """Get all users"""
         users = User.query.all()
-        user_list = [{"id": user.id, 
-                      "unique_user": user.unique_user, 
-                      "name": user.name, 
-                      "email": user.email, 
+        user_list = [{"id": user.id,
+                      "unique_user": user.unique_user,
+                      "name": user.name,
+                      "email": user.email,
                       "password": user.password} for user in users]
         return user_list, 200
-
