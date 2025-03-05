@@ -206,6 +206,32 @@ class TestUser(object):
         # Including the initial 3 users created in _populate_db
         # copilot created this thing above to help debug the test
 
+    def test_deleting_user(self, client):
+        "test deleting user from the database"
+        # create user to delete
+        resp = client.post(
+            self.RESOURCE_URL,
+            json={
+                "name": "Delete User",
+                "email": "delete.user@gmail.com",
+                "password": "deleteuser123"
+            }
+        )
+        assert resp.status_code == 201  # Successful creation
+        user_data = resp.get_json()
+        assert user_data is not None
+        assert "unique_user" in user_data
+        unique_user = user_data["unique_user"]
+
+        # delete the user
+        resp = client.delete(f"{self.RESOURCE_URL}{unique_user}/")
+        assert resp.status_code == 204  # Successful deletion
+
+        # verify the deletion
+        resp = client.get(f"{self.RESOURCE_URL}{unique_user}/")
+        assert resp.status_code == 404
+        assert resp.get_json() == {"error": "User not found"}
+
 class TestGroup(object):
     "Test the Group resource"
     RESOURCE_URL = "/api/group/"
@@ -379,6 +405,31 @@ class TestGroup(object):
         message = f"Adding user to group failed: {user_id_message}"
         assert resp.status_code == 201, message
         assert resp.get_json() == {"message": "User added to group successfully"}
+
+    def test_deleting_group(self, client):
+        "test deleting group from the database"
+        # create group to delete
+        resp = client.post(
+            self.RESOURCE_URL,
+            json={
+                "name": "Delete Group",
+                "unique_group": "delete-group-uuid"
+            }
+        )
+        assert resp.status_code == 201  # Successful creation
+        group_data = resp.get_json()
+        assert group_data is not None, "Failed to create group"
+        assert "group_id" in group_data, "Response does not contain group_id"
+        group_id = group_data["group_id"]
+
+        # delete the group
+        resp = client.delete(f"{self.RESOURCE_URL}{group_id}/")
+        assert resp.status_code == 204  # Successful deletion
+
+        # verify the deletion
+        resp = client.get(f"{self.RESOURCE_URL}{group_id}/")
+        assert resp.status_code == 404
+        assert resp.get_json() == {"error": "Group not found"}
 
 class TestTask(object):
     "Test the Task resource"
@@ -576,3 +627,42 @@ class TestTask(object):
         tasks = resp.get_json()
         assert len(tasks) == 3, "Expected 3 tasks"
         # copilot created this thing above to help debug the test
+
+    def test_deleting_task(self, client):
+        "test deleting task from the database"
+        # create group + task to delete
+        group_resp = client.post(
+            "/api/group/",
+            json={"name": "Task Group"}
+        )
+        task_group_message = group_resp.get_data(as_text=True)
+        assert group_resp.status_code == 201, f"Group creation failed: {task_group_message}"
+        group_data = group_resp.get_json()
+        group_id = group_data["group_id"]
+
+        task_resp = client.post(
+            f"/api/group/{group_id}/task/",
+            json={
+                "title": "Delete Task",
+                "description": "Task to be deleted",
+                "status": "Pending",
+                "deadline": "2023-12-31T23:59:59",
+                "created_at": "2023-01-01T00:00:00",
+                "updated_at": "2023-01-01T00:00:00"
+            }
+        )
+        task_creation_message = task_resp.get_data(as_text=True)
+        message = f"Task creation failed: {task_creation_message}"
+        assert task_resp.status_code == 201, message
+        task_data = task_resp.get_json()
+        assert "id" in task_data, "Task creation response does not contain 'id'"
+        task_id = task_data["id"]
+
+        # delete the task
+        resp = client.delete(f"{self.RESOURCE_URL}{task_id}/")
+        assert resp.status_code == 204  # Successful deletion
+
+        # verify the deletion
+        resp = client.get(f"{self.RESOURCE_URL}{task_id}/")
+        assert resp.status_code == 404
+        assert resp.get_json() == {"error": "Task not found"}

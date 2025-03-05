@@ -98,6 +98,16 @@ class TaskItem(Resource):
         db.session.commit()
         return {"message": "Task updated successfully"}, 200
 
+    def delete(self, task_id):
+        """Deletes a task by its ID"""
+        task = db.session.get(Task, task_id)
+        if not task:
+            return {"error": "Task not found"}, 404
+
+        db.session.delete(task)
+        db.session.commit()
+        return {"message": "Task deleted successfully"}, 204
+
 class TaskCollection(Resource):
 
     """Resource class for get, post methods for Task"""
