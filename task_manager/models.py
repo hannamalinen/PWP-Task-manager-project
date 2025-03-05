@@ -1,20 +1,26 @@
-import click
+"""This module contains the models for the task manager application."""
 import hashlib
+import click
 from flask.cli import with_appcontext
 from task_manager import db
 
-# from github -> https://github.com/enkwolf/pwp-course-sensorhub-api-example/blob/master/sensorhub/models.py
+# from github
+# https://github.com/enkwolf/pwp-course-sensorhub-api-example/blob/master/sensorhub/models.py
 class ApiKey(db.Model):
-    
+    " ApiKey Model, from github"
     key = db.Column(db.String(32), nullable=False, unique=True, primary_key=True)
     admin =  db.Column(db.Boolean, default=False)
-    
+
     @staticmethod
     def key_hash(key):
+        " Generate a hash for the key"
         return hashlib.sha256(key.encode()).digest()
 
 # models from exercise 1
 class User(db.Model):
+
+    " User database model, models from ex. 1"
+
     id = db.Column(db.Integer, primary_key=True)
     unique_user = db.Column(db.String(64), nullable=False, unique=True)
     name = db.Column(db.String(64), nullable=False)
@@ -23,20 +29,26 @@ class User(db.Model):
 
     user_groups = db.relationship("UserGroup", back_populates="user")
 
-# from Lovelace -> https://lovelace.oulu.fi/ohjelmoitava-web/ohjelmoitava-web/implementing-rest-apis-with-flask/
+# from Lovelace
     def serialize(self, short_form=False):
+
+        " Serialize the user, from Lovelace"
+
         doc = {
             "name" : self.name,
         }
         if not short_form:
             doc["email"] = self.email
         return doc
-    
+
     def deserialize(self, doc):
-        pass
+        " Deserialize the user"
 
     @staticmethod
     def json_schema():
+
+        " JSON schema for the user"
+
         schema = {
             "type": "object",
             "required": ["name", "email", "password"]
@@ -57,6 +69,9 @@ class User(db.Model):
         return schema
 
 class Task(db.Model):
+
+    " Task database model, models from ex. 1"
+
     id = db.Column(db.Integer, primary_key=True)
     unique_task = db.Column(db.String(64), nullable=False, unique=True)
     title = db.Column(db.String(64), nullable=False)
@@ -65,12 +80,19 @@ class Task(db.Model):
     deadline = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, nullable=True)
     updated_at = db.Column(db.DateTime, nullable=False)
-    usergroup_id = db.Column(db.Integer, db.ForeignKey('user_group.id', ondelete='CASCADE'), nullable=False)  # ondelete='SET NULL' is used to set the foreign key to NULL when the referenced row is deleted
+    usergroup_id = db.Column(db.Integer,
+                            db.ForeignKey('user_group.id',
+                            ondelete='CASCADE'),
+                            nullable=False)
+    # ondelete='SET NULL' is used to set the foreign key to NULL when the referenced row is deleted
 
     user_group = db.relationship("UserGroup", back_populates="tasks")
 
-# from Lovelace -> https://lovelace.oulu.fi/ohjelmoitava-web/ohjelmoitava-web/implementing-rest-apis-with-flask/
+# from Lovelace
     def serialize(self, short_form=False):
+
+        " Serialize the task, from Lovelace"
+
         doc = {
             "title" : self.title,
             "deadline" : self.deadline,
@@ -82,8 +104,11 @@ class Task(db.Model):
             doc["updated_at"] = self.updated_at
             doc["usergroup_id"] = self.usergroup_id
         return doc
-    
+
     def deserialize(self, doc):
+
+        " Deserialize the task"
+
         self.title = doc["title"]
         self.description = doc["description"]
         self.status = doc["status"]
@@ -94,9 +119,18 @@ class Task(db.Model):
 
     @staticmethod
     def json_schema():
+
+        " JSON schema for the task"
+
         schema = {
             "type": "object",
-            "required": ["title", "description", "status", "deadline", "created_at", "updated_at", "usergroup_id"]
+            "required": ["title",
+                        "description",
+                        "status",
+                        "deadline",
+                        "created_at",
+                        "updated_at",
+                        "usergroup_id"]
         }
         props = schema["properties"] = {}
         props["title"] = {
@@ -133,36 +167,48 @@ class Task(db.Model):
         return schema
 
 class Group(db.Model):
+    """ Group database model, models from ex. 1 """
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), nullable=False)
     unique_group = db.Column(db.String(64), nullable=False, unique=True)
 
-    user_groups = db.relationship("UserGroup", back_populates="groups", cascade="all, delete-orphan")
+    user_groups = db.relationship("UserGroup",
+                                back_populates="groups",
+                                cascade="all, delete-orphan")
 
-# from Lovelace -> https://lovelace.oulu.fi/ohjelmoitava-web/ohjelmoitava-web/implementing-rest-apis-with-flask/
+# from Lovelace
     def serialize(self):
+        " Serialize the group, from Lovelace"
         return {
             "name": self.name,
         }
 
 class UserGroup(db.Model):
+    """ UserGroup database model, models from ex. 1 """
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)  # ondelete='CASCADE' is used to delete all the rows in the child table when the referenced row in the parent table is deleted
-    group_id = db.Column(db.Integer, db.ForeignKey('group.id', ondelete='CASCADE'), nullable=False)  # ondelete='CASCADE' is used to delete all the rows in the child table when the referenced row in the parent table is deleted
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    # ondelete='CASCADE' is used to delete all the rows in the child
+    # table when the referenced row in the parent table is deleted
+    group_id = db.Column(db.Integer, db.ForeignKey('group.id', ondelete='CASCADE'), nullable=False)
+     # ondelete='CASCADE' is used to delete all the
+     # rows in the child table when the referenced row in the parent table is deleted
     role = db.Column(db.String(64), nullable=False)
-    
+
     user = db.relationship("User", back_populates="user_groups")
     groups = db.relationship("Group", back_populates="user_groups")
     tasks = db.relationship("Task", back_populates="user_group")
 
-# from Lovelace -> https://lovelace.oulu.fi/ohjelmoitava-web/ohjelmoitava-web/implementing-rest-apis-with-flask/
+# from Lovelace
     def serialize(self):
+        " Serialize the usergroup, from Lovelace"
         return {
             "role": self.role,
         }
-    
+
     @staticmethod
     def json_schema():
+        " JSON schema for the usergroup"
         schema = {
             "type": "object",
             "required": ["role"]
@@ -177,4 +223,5 @@ class UserGroup(db.Model):
 @click.command("init-db")
 @with_appcontext
 def init_db_command():
+    " Create new tables."
     db.create_all()
