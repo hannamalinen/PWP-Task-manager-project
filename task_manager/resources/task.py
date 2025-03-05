@@ -93,7 +93,7 @@ class TaskItem(Resource):
                 task.deadline = datetime.fromisoformat(data["deadline"])
             except ValueError:
                 return invalid_format_message, 400
-        # copilot helped with isoformat thing - the datetime was not working properly
+        # there was also in LoveLace about isoformat, but copilot helped us to implement it
 
         task.updated_at = datetime.now()
         db.session.commit()
