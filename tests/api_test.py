@@ -1,3 +1,5 @@
+"Testing the API endpoints of the task manager application"
+
 import uuid
 import time
 import os
@@ -13,7 +15,9 @@ TEST_KEY = "tepontarinat"
 # from github /tests/resource_test.py
 # https://github.com/enkwolf/pwp-course-sensorhub-api-example/blob/master/tests/resource_test.py
 class AuthHeaderClient(FlaskClient):
-    """A test client that adds the task-manager-api-key header to all requests"""
+    """
+    A test client that adds the task-manager-api-key header to all requests
+    """
     def open(self, *args, **kwargs):
         api_key_headers = Headers({
             'task-manager-api-key': TEST_KEY
@@ -25,7 +29,9 @@ class AuthHeaderClient(FlaskClient):
 
 @pytest.fixture
 def client():
-    """Create a test client for the app"""
+    """
+    Create a test client for the app
+    """
     db_fd, db_fname = tempfile.mkstemp()
     config = {
         "SQLALCHEMY_DATABASE_URI": "sqlite:///" + db_fname,
@@ -48,7 +54,9 @@ def client():
     os.unlink(db_fname)
 
 def _populate_db():
-    """Populate the database with test data"""
+    """
+    Populate the database with test data
+    """
     for i in range(1, 4):
         user = User(
             unique_user=str(uuid.uuid4()),
@@ -71,10 +79,13 @@ def _populate_db():
     db.session.commit()
 
 class TestUser(object):
-    """Test the User resource"""
+    """
+    Test the User resource
+    """
     RESOURCE_URL = "/api/user/"
 
     def test_creating_user(self, client):
+        "test creating user to the database"
         # test valid user creation
         resp = client.post(
             self.RESOURCE_URL,
@@ -120,7 +131,7 @@ class TestUser(object):
         assert resp.get_json() == {'error': 'User not found'}
 
     def test_updating_user(self, client):
-        # create user to update
+        "test updating user"
         resp = client.post(
             self.RESOURCE_URL,
             json={
@@ -155,7 +166,7 @@ class TestUser(object):
         assert updated_user_data["email"] == "updated.email@gmail.com"
 
     def test_get_user(self, client):
-        # create a user to get
+        "test getting user from the database"
         resp = client.post(
             self.RESOURCE_URL,
             json={
@@ -175,7 +186,7 @@ class TestUser(object):
         assert retrieved_user["name"] == "Get User"
 
     def test_get_all_users(self, client):
-        # create users to get
+        "test getting all users from the database"
         for i in range(3):
             resp = client.post(
                 self.RESOURCE_URL,
@@ -196,10 +207,11 @@ class TestUser(object):
         # copilot created this thing above to help debug the test
 
 class TestGroup(object):
+    "Test the Group resource"
     RESOURCE_URL = "/api/group/"
 
     def test_creating_group(self, client):
-        # test valid group creation
+        "test creating group to the database"
         resp = client.post(
             self.RESOURCE_URL,
             json={
@@ -217,7 +229,7 @@ class TestGroup(object):
         assert resp.get_json() == {"error": "Invalid request - name must be a string"}
 
     def test_updating_group(self, client):
-        # create group to update
+        "test updating group"
         resp = client.post(
             self.RESOURCE_URL,
             json={
@@ -250,7 +262,7 @@ class TestGroup(object):
         assert updated_group_data["unique_group"] == "updated-unique-group"
 
     def test_get_group(self, client):
-        # create group for getting
+        "test getting group from the db"
         resp = client.post(
             self.RESOURCE_URL,
             json={"name": "Retrieve Group"}
@@ -266,7 +278,7 @@ class TestGroup(object):
         assert retrieved_group["name"] == "Retrieve Group"
 
     def test_get_group_members(self, client):
-        # create a group and add a user to the group
+        "test getting group members and then"
         group_resp = client.post(
             self.RESOURCE_URL,
             json={"name": "Members Group"}
@@ -320,6 +332,7 @@ class TestGroup(object):
         assert any(member["name"] == "Member User" for member in members)
 
     def test_add_user_to_group(self, client):
+        "test adding user to group"
         # create group + user to add to the group
         group_resp = client.post(
             self.RESOURCE_URL,
@@ -368,10 +381,12 @@ class TestGroup(object):
         assert resp.get_json() == {"message": "User added to group successfully"}
 
 class TestTask(object):
+    "Test the Task resource"
     RESOURCE_URL = "/api/task/"
 
     def test_create_task(self, client):
-        # create group to put the task with
+        "test creating task to the database"
+        # create group + task to create
         group_resp = client.post(
             "/api/group/",
             json={"name": "Task Group"}
@@ -400,7 +415,7 @@ class TestTask(object):
         assert "id" in task_data, "Task creation response does not contain 'id'"
 
     def test_get_task(self, client):
-        # create group + task to get
+        "test getting task from the database"
         group_resp = client.post(
             "/api/group/",
             json={"name": "Task Group"}
@@ -439,7 +454,7 @@ class TestTask(object):
         assert retrieved_task["description"] == "Task description"
 
     def test_update_task(self, client):
-        # create group + task to update
+        "test updating task"
         group_resp = client.post(
             "/api/group/",
             json={"name": "Task Group"}
@@ -492,7 +507,7 @@ class TestTask(object):
         assert updated_task["status"] == "Completed"
 
     def test_get_all_tasks(self, client):
-        # create group + tasks to retrieve
+        "test getting all tasks from the database"
         group_resp = client.post(
             "/api/group/",
             json={"name": "Task Group"}
@@ -529,7 +544,7 @@ class TestTask(object):
         # copilot created this thing above to help debug the test
 
     def test_get_group_tasks(self, client):
-        # create group + tasks to get
+        "test getting group tasks"
         group_resp = client.post(
             "/api/group/",
             json={"name": "Task Group"}
