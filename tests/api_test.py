@@ -655,14 +655,14 @@ class TestTask(object):
         message = f"Task creation failed: {task_creation_message}"
         assert task_resp.status_code == 201, message
         task_data = task_resp.get_json()
-        assert "id" in task_data, "Task creation response does not contain 'id'"
-        task_id = task_data["id"]
+        assert "unique_task" in task_data, "Task creation response does not contain 'unique_task'"
+        unique_task = task_data["unique_task"]
 
         # delete the task
-        resp = client.delete(f"{self.RESOURCE_URL}{task_id}/")
+        resp = client.delete(f"{self.RESOURCE_URL}{unique_task}/")
         assert resp.status_code == 204  # Successful deletion
 
         # verify the deletion
-        resp = client.get(f"{self.RESOURCE_URL}{task_id}/")
+        resp = client.get(f"{self.RESOURCE_URL}{unique_task}/")
         assert resp.status_code == 404
         assert resp.get_json() == {"error": "Task not found"}

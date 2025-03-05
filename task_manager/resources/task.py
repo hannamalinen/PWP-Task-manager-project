@@ -98,9 +98,9 @@ class TaskItem(Resource):
         db.session.commit()
         return {"message": "Task updated successfully"}, 200
 
-    def delete(self, task_id):
-        """Deletes a task by its ID"""
-        task = db.session.get(Task, task_id)
+    def delete(self, unique_task):
+        """Deletes a task by its unique_task"""
+        task = Task.query.filter_by(unique_task=unique_task).first()
         if not task:
             return {"error": "Task not found"}, 404
 
@@ -127,11 +127,6 @@ class TaskCollection(Resource):
                       "usergroup_id": task.usergroup_id} for task in tasks]
         return task_list, 200
     # copilot helped with isoformat thing - the datetime was not working properly
-
-    def post(self):
-
-        """Creates a new task"""
-
 
 class GroupTaskCollection(Resource):
 
