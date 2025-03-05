@@ -6,10 +6,8 @@ from flask_restful import Resource
 from task_manager.models import Group, User, UserGroup
 from task_manager import db
 
-
-
 class GroupItem(Resource):
-    " Resource class for get, post, put methods for Group"
+    " Resource class for get, post, put, delete methods for Group"
 
     # getting group
     def get(self, group_id):
@@ -78,6 +76,17 @@ class GroupItem(Resource):
         return {
             "message": "Group updated successfully"
         }, 200
+
+    # deleting group
+    def delete(self, group_id):
+        """Deletes a group by its ID"""
+        group = db.session.get(Group, group_id)
+        if not group:
+            return {"error": "Group not found"}, 404
+
+        db.session.delete(group)
+        db.session.commit()
+        return {"message": "Group deleted successfully"}, 204
 
 class GroupMembers(Resource):
     "Resource class for get method for GroupMembers"
