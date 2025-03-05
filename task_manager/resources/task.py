@@ -25,6 +25,7 @@ class TaskItem(Resource):
             "updated_at": task.updated_at.isoformat(),
             "usergroup_id": task.usergroup_id
         }, 200
+        # there was also in LoveLace about isoformat, but copilot helped us to implement it
 
     def post(self, group_id):
         """Creates a new task"""
@@ -126,7 +127,7 @@ class TaskCollection(Resource):
                       "updated_at": task.updated_at.isoformat(), 
                       "usergroup_id": task.usergroup_id} for task in tasks]
         return task_list, 200
-    # copilot helped with isoformat thing - the datetime was not working properly
+    # there was also in LoveLace about isoformat, but copilot helped us to implement it
 
 class GroupTaskCollection(Resource):
 
@@ -152,4 +153,4 @@ class GroupTaskCollection(Resource):
             "updated_at": task.updated_at.isoformat(),
             "usergroup_id": task.usergroup_id
         } for task in tasks], 200
-        # copilot helped with isoformat thing - the datetime was not working properly
+        # there was also in LoveLace about isoformat, but copilot helped us to implement it
