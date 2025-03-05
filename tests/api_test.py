@@ -412,7 +412,7 @@ class TestTask(object):
         task_message = f"Task creation failed: {task_creation_message}"
         assert resp.status_code == 201, task_message
         task_data = resp.get_json()
-        assert "id" in task_data, "Task creation response does not contain 'id'"
+        assert "unique_task" in task_data, "Task creation response does not contain 'unique_task'"
 
     def test_get_task(self, client):
         "test getting task from the database"
@@ -441,11 +441,11 @@ class TestTask(object):
         message = f"Task creation failed: {create_task_message}"
         assert task_resp.status_code == 201, message
         task_data = task_resp.get_json()
-        assert "id" in task_data, "Task creation response does not contain 'id'"
-        task_id = task_data["id"]
+        assert "unique_task" in task_data, "Task creation response does not contain 'unique_task'"
+        unique_task = task_data["unique_task"]
 
         # test getting the task
-        resp = client.get(f"{self.RESOURCE_URL}{task_id}/")
+        resp = client.get(f"{self.RESOURCE_URL}{unique_task}/")
         get_task_message = resp.get_data(as_text=True)
         message = f"Task retrieval failed: {get_task_message}"
         assert resp.status_code == 200, message
@@ -480,12 +480,12 @@ class TestTask(object):
         message = f"Task creation failed: {task_creation_message}"
         assert task_resp.status_code == 201, message
         task_data = task_resp.get_json()
-        assert "id" in task_data, "Task creation response does not contain 'id'"
-        task_id = task_data["id"]
+        assert "unique_task" in task_data, "Task creation response does not contain 'unique_task'"
+        unique_task = task_data["unique_task"]
 
         # test updating the task
         resp = client.put(
-            f"{self.RESOURCE_URL}{task_id}/",
+            f"{self.RESOURCE_URL}{unique_task}/",
             json={
                 "title": "Updated Task",
                 "description": "Updated description",
@@ -497,7 +497,7 @@ class TestTask(object):
         assert resp.get_json() == {"message": "Task updated successfully"}
 
         # update
-        resp = client.get(f"{self.RESOURCE_URL}{task_id}/")
+        resp = client.get(f"{self.RESOURCE_URL}{unique_task}/")
         update_task_message = resp.get_data(as_text=True)
         message = f"Task retrieval failed: {update_task_message}"
         assert resp.status_code == 200, message

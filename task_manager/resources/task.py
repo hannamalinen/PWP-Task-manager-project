@@ -10,9 +10,9 @@ from task_manager import db
 class TaskItem(Resource):
     """Resource class for get, post, put, delete methods for Task"""
 
-    def get(self, task_id):
-        """Get a task by its ID and returns the whole task"""
-        task = db.session.get(Task, task_id)
+    def get(self, unique_task):
+        """Get a task by its unique_task and returns the whole task"""
+        task = Task.query.filter_by(unique_task=unique_task).first()
         if not task:
             return {"error": "Task not found"}, 404
         return {
@@ -69,15 +69,15 @@ class TaskItem(Resource):
         db.session.commit()
         return {
             "message": "Task added successfully",
-            "id": task.id
+            "unique_task": new_uuid
         }, 201
 
-    def put(self, task_id):
+    def put(self, unique_task):
         """Updates a task information of an existing task"""
         if not request.is_json:
             return {"error": "Request content type must be JSON"}, 415
         data = request.get_json()
-        task = db.session.get(Task, task_id)
+        task = Task.query.filter_by(unique_task=unique_task).first()
         if not task:
             return {"error": "Task not found"}, 404
         if "title" in data:
