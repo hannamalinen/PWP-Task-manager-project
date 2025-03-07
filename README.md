@@ -65,48 +65,58 @@ Then we can start with our database and give commands to it! Our HTTP address is
 ## Populating the database
 Data can be sent using curl-commands or Postman. We mainly used curl-commands at this point
 
-We only used: POST, GET
+We only used: POST, GET while testing to populate our database
 
-## User-related commands
-## Adding new user (name, email, password)
-Mac:  
-curl -X POST http://127.0.0.1:5000/user/add/ -H "Content-Type: application/json" -d '{"name": "Jane Smith", "email": "jane.smith@example.com", "password": "password123"}'  
-Windows:  
-curl -X POST http://127.0.0.1:5000/user/add/ -H "Content-Type: application/json" -d "{\"name\": \"Jane Smith\", \"email\": \"jane.smith@example.com\", \"password\": \"password123\"}"
+Few example curl-commands to populate our DB:
 
-## UserGroup-related commands
-## Adding new user to a group (group number)
-Mac:  
-curl -X POST http://127.0.0.1:5000/group/1/add/ -H "Content-Type: application/json" -d "{"user_id": 1}"  
-Windows:  
-curl -X POST http://127.0.0.1:5000/group/1/add/ -H "Content-Type: application/json" -d "{\"user_id\": 1}"
-## Getting the groups designated tasks
-Mac:  
-curl -X GET http://127.0.0.1:5000/group/1/tasks  
-Windows:  
-curl -X GET http://127.0.0.1:5000/group/1/tasks
+- adding a user: curl -X POST http://127.0.0.1:5000/user/add/ -H "Content-Type: application/json" -d "{\"name\": \"John Doe\", \"email\": \"john.doe@example.com\", \"password\": \"password123\"}"
 
-## Group-related commands
-## Adding new group
-Mac:  
-curl -X POST http://127.0.0.1:5000/group -H "Content-Type: application/json" -d "{"name": "Developers"}"  
-Windows:  
-curl -X POST http://127.0.0.1:5000/group -H "Content-Type: application/json" -d "{\"name\": \"Developers\"}"
-## To check members of the group
-Mac:  
-curl -X GET http://127.0.0.1:5000/group/1/members  
-Windows:  
-curl -X GET http://127.0.0.1:5000/group/1/members
+- adding a new task to group: curl -X POST http://127.0.0.1:5000/group/1/task/add/ -H "Content-Type: application/json" -d "{\"title\": \"Complete project\", \"description\": \"Finish the project by end of the week\", \"status\": 1, \"deadline\": \"2025-02-15T00:00:00\", \"created_at\": \"2025-02-01T00:00:00\", \"updated_at\": \"2025-02-01T00:00:00\"}"
 
-## Task-related commands
-## Getting all tasks
-Mac:  
-curl -X GET http://127.0.0.1:5000/task/get/  
-Windows:  
-curl -X GET http://127.0.0.1:5000/task/get/
+## Deployment - COPILOT CREATED INSTRUCTION ON HOW TO DEPLOY OUR API
 
-## Adding a new task
-Mac:  
-curl -X POST http://127.0.0.1:5000/group/1/task/add/ -H "Content-Type: application/json" -d "{"title": "Complete project", "description": "Finish the project by end of the week", "status": 1, "deadline": "2025-02-15T00:00:00", "created_at": "2025-02-01T00:00:00", "updated_at": "2025-02-01T00:00:00"}"  
-Windows:  
-curl -X POST http://127.0.0.1:5000/group/1/task/add/ -H "Content-Type: application/json" -d "{\"title\": \"Complete project\", \"description\": \"Finish the project by end of the week\", \"status\": 1, \"deadline\": \"2025-02-15T00:00:00\", \"created_at\": \"2025-02-01T00:00:00\", \"updated_at\": \"2025-02-01T00:00:00\"}"
+Prompt for Copilot: Create instructions on how to deploy our Task Management API
+
+To deploy the API, follow these steps:
+
+1. **Set up environment variables**:
+    ```sh
+    export FLASK_APP=run.py
+    export FLASK_ENV=production
+    export DATABASE_URL=your_database_url
+    ```
+
+2. **Run database migrations**:
+    ```sh
+    flask db upgrade
+    ```
+
+3. **Use Gunicorn to run the application**:
+    ```sh
+    gunicorn -w 4 -b 0.0.0.0:8000 run:app
+    ```
+
+4. **Configure a web server (e.g., Nginx) to proxy requests to Gunicorn**:
+    ```nginx
+    server {
+        listen 80;
+        server_name your_domain.com;
+
+        location / {
+            proxy_pass http://127.0.0.1:8000;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+    }
+    ```
+
+## Running Tests
+
+1. Ensure your virtual environment is activated!
+
+2. Run the tests using pytest:
+    ```sh
+    pytest tests/api_test.py
+    ```
