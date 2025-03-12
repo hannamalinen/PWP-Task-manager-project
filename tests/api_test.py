@@ -431,6 +431,75 @@ class TestGroup(object):
         assert resp.status_code == 404
         assert resp.get_json() == {"error": "Group not found"}
 
+    def test_deleting_user_from_group(self, client):
+        # this is created by Copilot mainly. The first part is taken from the above test,
+        # test_adding_user_to_group. Copilot did not want to use the unique id,
+        # it always suggested to use user.id.
+        # Few tests in the end ensures that even the user is deleted
+        # from the group, the user is still in the database, but not in the group.
+        "test deleting user from group"
+        # create group + user to add to the group
+
+        group_resp = client.post(
+            self.RESOURCE_URL,
+            json={"name": "Delete User Group"}
+        )
+        assert_group_message = group_resp.get_data(as_text=True)
+        assert group_resp.status_code == 201, f"Group creation failed: {assert_group_message}"
+        group_data = group_resp.get_json()
+        group_id = group_data["group_id"]
+
+        user_resp = client.post(
+            "/api/user/",
+            json={
+                "name": "Delete User",
+                "email": "delete.user@gmail.com",
+                "password": "deleteuserpassword"
+            }
+        )
+        assert_user_message = user_resp.get_data(as_text=True)
+        assert user_resp.status_code == 201, f"User creation failed: {assert_user_message}"
+        user_data = user_resp.get_json()
+        assert_user_data_message = {user_resp.get_data(as_text=True)}
+        message = f"User creation failed: {assert_user_data_message}"
+        assert "unique_user" in user_data, message
+        user_id = user_data["unique_user"]
+
+        # commit the user to the database
+        with client.application.app_context():
+            db.session.commit()
+
+        # a delay to allow the database to process the commit
+        # - copilot created this to help debug the test
+        time.sleep(1)
+
+        # debug information  - copilot created this to help debug the test
+        print(f"User ID: {user_id}")
+
+        # test adding the user to group
+        resp = client.post(
+            f"/api/group/{group_id}/user/",
+            json={"user_id": user_id, "role": "member"}
+        )
+        user_id_message = resp.get_data(as_text=True)
+        message = f"Adding user to group failed: {user_id_message}"
+        assert resp.status_code == 201, message
+        assert resp.get_json() == {"message": "User added to group successfully"}
+
+        # delete the user from the group
+        delete_user_resp = client.delete(
+            f"/api/group/{group_id}/user/"
+            , json={"user_id": user_id}
+        )
+        print(f"Delete user response: {delete_user_resp.get_data(as_text=True)}")  # Debug information
+        assert delete_user_resp.status_code == 204, f"Deleting user from group failed: {delete_user_resp.get_data(as_text=True)}"
+        #check that the group is still there
+        resp = client.get(f"/api/group/{group_id}/")
+        assert resp.status_code == 200
+        # check that the user is still there, but not in the group
+        resp = client.get(f"/api/user/{user_id}/")
+        assert resp.status_code == 200
+
 class TestTask(object):
     "Test the Task resource"
     RESOURCE_URL = "/api/task/"

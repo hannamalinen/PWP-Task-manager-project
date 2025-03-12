@@ -138,3 +138,30 @@ class UserToGroup(Resource):
         db.session.commit()
 
         return {"message": "User added to group successfully"}, 201
+    
+    #this is from copilot, wrote just def delete and it suggested this. Approved it.
+    def delete(self, group_id):
+        """Remove a user from a group."""
+        if not request.is_json:
+            return {"error": "Request content type must be JSON"}, 415
+        try:
+            user_id = request.json["user_id"]
+        except KeyError:
+            return {"error": "Incomplete request - missing fields"}, 400
+
+        group = db.session.get(Group, group_id)
+        if not group:
+            return {"error": "Group not found"}, 404
+
+        user = User.query.filter_by(unique_user=user_id).first()
+        if not user:
+            return {"error": "User not found"}, 404
+
+        user_group = UserGroup.query.filter_by(user_id=user.id, group_id=group_id).first()
+        if not user_group:
+            return {"error": "User not in group"}, 400
+
+        db.session.delete(user_group)
+        db.session.commit()
+
+        return {"message": "User removed from group successfully"}, 204
