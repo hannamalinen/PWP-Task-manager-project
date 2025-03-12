@@ -23,7 +23,7 @@ class GroupItem(Resource):
 
     # creating group
     def post(self):
-        "Creates a new group, name and unique uuid is created"  
+        "Post method for creating a new group"  
         if not request.is_json:
             return {"error": "Request content type must be JSON"}, 415
         try:
@@ -89,7 +89,7 @@ class GroupItem(Resource):
         return {"message": "Group deleted successfully"}, 204
 
 class GroupMembers(Resource):
-    "Resource class for get method for GroupMembers"
+    "Resource class for getting the group members
     # getting group members
     def get(self, group_id):
         """Get all members of a group by group ID."""
@@ -105,7 +105,7 @@ class GroupMembers(Resource):
         } for member in members], 200
 
 class UserToGroup(Resource):
-    "Resource class for post method for UserToGroup"
+    "Resource class for adding a user to a group"
     # adding user to group
     def post(self, group_id):
         """Add a user to a group."""
@@ -138,3 +138,21 @@ class UserToGroup(Resource):
         db.session.commit()
 
         return {"message": "User added to group successfully"}, 201
+        
+        def delete(self, group_id):
+        """Delete a user from a group."""
+        if not request.is_json:
+            return {"error": "Request content type must be JSON"}, 415
+        try:
+            user_id = request.json["user_id"]
+        except KeyError:
+            return {"error": "Incomplete request - missing fields"},
+
+        group = db.session.get(Group, group_id) 
+        if not group:
+            return {"error": "Group not found"}, 404
+            
+        user = User.query.filter_by(unique_user=user_id).first()
+        if not user:
+            return {"error": "User not found"}, 404    
+        

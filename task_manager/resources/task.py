@@ -11,7 +11,7 @@ class TaskItem(Resource):
     """Resource class for get, post, put, delete methods for Task"""
 
     def get(self, unique_task):
-        """Get a task by its unique_task and returns the whole task"""
+        """Get a task by its unique_task id and returns the whole task"""
         task = Task.query.filter_by(unique_task=unique_task).first()
         if not task:
             return {"error": "Task not found"}, 404
@@ -111,7 +111,7 @@ class TaskItem(Resource):
 
 class TaskCollection(Resource):
 
-    """Resource class for get, post methods for Task"""
+    """Resource class for get all tasks"""
 
     def get(self):
 
@@ -131,7 +131,7 @@ class TaskCollection(Resource):
 
 class GroupTaskCollection(Resource):
 
-    """Resource class for get method for GroupTaskCollection"""
+    """Resource class for get method, get all tasks of a group"""
 
     def get(self, group_id):
 

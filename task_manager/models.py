@@ -4,6 +4,49 @@ import click
 from flask.cli import with_appcontext
 from task_manager import db
 
+# association table for many-to-many relationship between User and Group
+# from Lovelace
+# https://lovelace.oulu.fi/ohjelmoitava-web/ohjelmoitava-web/introduction-to-web-development/
+# from youtube
+#https://www.youtube.com/watch?v=iosh_DWnliE
+
+# class UserGroup(db.Model):
+#     __tablename__ = "user_group"
+#     id = db.Column(db.Integer, primary_key=True)
+#     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+#     group_id = db.Column(db.Integer, db.ForeignKey("group.id"), nullable=False)
+#     role = db.Column(db.String(64), nullable=False)
+    
+#     user = db.relationship("User", back_populates="user_groups")
+#     groups = db.relationship("Group", back_populates="user_groups")
+#     tasks = db.relationship("Task", back_populates="user_group")
+    
+#     def serialize(self):
+#         return {
+#             "role": self.role,
+#         }
+        
+#     @staticmethod
+#     def json_schema():
+#         schema = {
+#             "type": "object",
+#             "required": ["role"]
+#         }
+#         props = schema["properties"] = {}
+#         props["role"] = {
+#             "description": "Role of the user in the group",
+#             "type": "string"
+#         }
+#         return schema   
+
+
+    # association table for many-to-many relationship between User and Group
+group_user = db.Table("group_user",
+    db.Column("group_id", db.Integer, db.ForeignKey("group.id", ondelete='CASCADE'), primary_key=True),
+    db.Column("user_id", db.Integer, db.ForeignKey("user.id", ondelete='CASCADE'), primary_key=True),
+    db.Column("role", db.String(64), nullable=False)
+)
+
 # from github
 # https://github.com/enkwolf/pwp-course-sensorhub-api-example/blob/master/sensorhub/models.py
 class ApiKey(db.Model):
@@ -27,7 +70,7 @@ class User(db.Model):
     email = db.Column(db.String(64), unique=True, nullable=False)
     password = db.Column(db.String(64), nullable=False)
 
-    user_groups = db.relationship("UserGroup", back_populates="user")
+    groups = db.relationship("Group", secondary=group_user, back_populates="users")
 
 # from Lovelace
     def serialize(self, short_form=False):
@@ -80,13 +123,13 @@ class Task(db.Model):
     deadline = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, nullable=True)
     updated_at = db.Column(db.DateTime, nullable=False)
+
     usergroup_id = db.Column(db.Integer,
-                            db.ForeignKey('user_group.id',
+                            db.ForeignKey('group_user.group_id',
                             ondelete='CASCADE'),
                             nullable=False)
-    # ondelete='SET NULL' is used to set the foreign key to NULL when the referenced row is deleted
-
-    user_group = db.relationship("UserGroup", back_populates="tasks")
+    # ondelete= CASCADE -> groups task are deleted if the group is deleted
+  #  user_group = db.relationship("Group", secondary=group_user, back_populates="tasks")
 
 # from Lovelace
     def serialize(self, short_form=False):
@@ -119,9 +162,7 @@ class Task(db.Model):
 
     @staticmethod
     def json_schema():
-
         " JSON schema for the task"
-
         schema = {
             "type": "object",
             "required": ["title",
@@ -173,9 +214,10 @@ class Group(db.Model):
     name = db.Column(db.String(64), nullable=False)
     unique_group = db.Column(db.String(64), nullable=False, unique=True)
 
-    user_groups = db.relationship("UserGroup",
-                                back_populates="groups",
-                                cascade="all, delete-orphan")
+    users = db.relationship("User",
+                                secondary=group_user,
+                                back_populates="group_user")
+    # cascade="all, delete-orphan" -> when a group is deleted, so is all the usergroups
 
 # from Lovelace
     def serialize(self):
@@ -183,21 +225,6 @@ class Group(db.Model):
         return {
             "name": self.name,
         }
-
-class UserGroup(db.Model):
-    """ UserGroup database model, models from ex. 1 """
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
-    # ondelete='CASCADE' is used to delete all the rows in the child
-    # table when the referenced row in the parent table is deleted
-    group_id = db.Column(db.Integer, db.ForeignKey('group.id', ondelete='CASCADE'), nullable=False)
-     # ondelete='CASCADE' is used to delete all the
-     # rows in the child table when the referenced row in the parent table is deleted
-    role = db.Column(db.String(64), nullable=False)
-
-    user = db.relationship("User", back_populates="user_groups")
-    groups = db.relationship("Group", back_populates="user_groups")
-    tasks = db.relationship("Task", back_populates="user_group")
 
 # from Lovelace
     def serialize(self):
