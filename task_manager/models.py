@@ -183,6 +183,20 @@ class Group(db.Model):
         return {
             "name": self.name,
         }
+    
+    @staticmethod
+    def json_schema():
+        " JSON schema for the usergroup"
+        schema = {
+            "type": "object",
+            "required": ["role"]
+        }
+        props = schema["properties"] = {}
+        props["role"] = {
+            "description": "Role of the user in the group",
+            "type": "string"
+            }
+        return schema
 
 class UserGroup(db.Model):
     """ UserGroup database model, models from ex. 1 """
