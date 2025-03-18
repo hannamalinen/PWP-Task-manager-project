@@ -138,7 +138,7 @@ class UserToGroup(Resource):
         db.session.commit()
 
         return {"message": "User added to group successfully"}, 201
-    
+
     #this is from copilot, wrote just def delete and it suggested this. Approved it.
     def delete(self, group_id):
         """Remove a user from a group."""

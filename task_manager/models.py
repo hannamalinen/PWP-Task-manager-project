@@ -18,9 +18,7 @@ class ApiKey(db.Model):
 
 # models from exercise 1
 class User(db.Model):
-
     " User database model, models from ex. 1"
-
     id = db.Column(db.Integer, primary_key=True)
     unique_user = db.Column(db.String(64), nullable=False, unique=True)
     name = db.Column(db.String(64), nullable=False)
@@ -31,9 +29,7 @@ class User(db.Model):
 
 # from Lovelace
     def serialize(self, short_form=False):
-
         " Serialize the user, from Lovelace"
-
         doc = {
             "name" : self.name,
         }
@@ -46,9 +42,7 @@ class User(db.Model):
 
     @staticmethod
     def json_schema():
-
         " JSON schema for the user"
-
         schema = {
             "type": "object",
             "required": ["name", "email", "password"]
@@ -69,9 +63,7 @@ class User(db.Model):
         return schema
 
 class Task(db.Model):
-
     " Task database model, models from ex. 1"
-
     id = db.Column(db.Integer, primary_key=True)
     unique_task = db.Column(db.String(64), nullable=False, unique=True)
     title = db.Column(db.String(64), nullable=False)
@@ -90,9 +82,7 @@ class Task(db.Model):
 
 # from Lovelace
     def serialize(self, short_form=False):
-
         " Serialize the task, from Lovelace"
-
         doc = {
             "title" : self.title,
             "deadline" : self.deadline,
@@ -106,9 +96,7 @@ class Task(db.Model):
         return doc
 
     def deserialize(self, doc):
-
         " Deserialize the task"
-
         self.title = doc["title"]
         self.description = doc["description"]
         self.status = doc["status"]
@@ -119,9 +107,7 @@ class Task(db.Model):
 
     @staticmethod
     def json_schema():
-
         " JSON schema for the task"
-
         schema = {
             "type": "object",
             "required": ["title",
@@ -168,7 +154,6 @@ class Task(db.Model):
 
 class Group(db.Model):
     """ Group database model, models from ex. 1 """
-
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), nullable=False)
     unique_group = db.Column(db.String(64), nullable=False, unique=True)
@@ -183,7 +168,7 @@ class Group(db.Model):
         return {
             "name": self.name,
         }
-    
+
     @staticmethod
     def json_schema():
         " JSON schema for the group"

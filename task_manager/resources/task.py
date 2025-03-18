@@ -110,13 +110,9 @@ class TaskItem(Resource):
         return {"message": "Task deleted successfully"}, 204
 
 class TaskCollection(Resource):
-
     """Resource class for get, post methods for Task"""
-
     def get(self):
-
         """Get all tasks and returns a list of tasks"""
-
         tasks = Task.query.all()
         task_list = [{"id": task.id,
                       "title": task.title, 
@@ -130,13 +126,10 @@ class TaskCollection(Resource):
     # there was also in LoveLace about isoformat, but copilot helped us to implement it
 
 class GroupTaskCollection(Resource):
-
     """Resource class for get method for GroupTaskCollection"""
 
     def get(self, group_id):
-
         """Get all tasks of a group"""
-
         group = db.session.get(Group, group_id)
         if not group:
             return {"error": "Group not found"}, 404
