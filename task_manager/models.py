@@ -35,10 +35,16 @@ class User(db.Model):
         }
         if not short_form:
             doc["email"] = self.email
+            doc["password"] = self.password
+            doc["unique_user"] = self.unique_user
         return doc
 
     def deserialize(self, doc):
         " Deserialize the user"
+        self.name = doc["name"]
+        self.email = doc["email"]
+        self.password = doc["password"]
+        self.unique_user = doc["unique_user"]
 
     @staticmethod
     def json_schema():
@@ -161,13 +167,15 @@ class Group(db.Model):
     user_groups = db.relationship("UserGroup",
                                 back_populates="groups",
                                 cascade="all, delete-orphan")
-
 # from Lovelace
     def serialize(self):
         " Serialize the group, from Lovelace"
         return {
             "name": self.name,
         }
+    def deserialize(self, doc):
+        " Deserialize the group"
+        self.name = doc["name"]   
 
     @staticmethod
     def json_schema():
@@ -204,6 +212,9 @@ class UserGroup(db.Model):
         return {
             "role": self.role,
         }
+    def deserialize(self, doc):
+        " Deserialize the usergroup"
+        self.role = doc["role"]    
 
     @staticmethod
     def json_schema():

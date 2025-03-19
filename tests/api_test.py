@@ -500,6 +500,132 @@ class TestGroup(object):
         resp = client.get(f"/api/user/{user_id}/")
         assert resp.status_code == 200
 
+        # test creating group with missing fields
+        # mainly created by copilot, when asked to create new tests for group.py
+    def test_create_group_with_invalid_data(self, client):
+        "test creating group with invalid data"
+        resp = client.post(
+            self.RESOURCE_URL,
+            json={"name": True}
+        )
+        assert resp.status_code == 400
+        assert resp.get_json() == {"error": "Invalid request - name must be a string"}
+
+        # created by copilot, when asked to create new tests for group.py
+    def test_create_group_with_missing_name(self, client):
+        "test creating group with missing name"
+        resp = client.post(
+            self.RESOURCE_URL,
+            json={}
+        )
+        assert resp.status_code == 400
+        assert resp.get_json() == {"error": "Incomplete request - missing name"}
+#created by copilot, when asked to create new tests for group.py
+    def test_getting_nonexistent_group(self, client):
+        "test getting nonexistent group"
+        resp = client.get(f"{self.RESOURCE_URL}101/")
+        assert resp.status_code == 404
+        assert resp.get_json() == {"error": "Group not found"}
+
+        #created by copilot, when asked to create new tests for group.py
+    def test_deleting_nonexistent_group(self, client):
+        "test deleting nonexistent group"
+        resp = client.delete(f"{self.RESOURCE_URL}101/")
+        assert resp.status_code == 404
+        assert resp.get_json() == {"error": "Group not found"}
+
+# put tests
+# created by copilot, when asked to create new tests for group.py
+    def test_updating_nonexistent_group(self, client):
+        "test updating nonexistent group"
+        resp = client.put(
+            f"{self.RESOURCE_URL}101/",
+            json={"name": "Updated Group"}
+        )
+        assert resp.status_code == 404
+        assert resp.get_json() == {"error": "Group not found"}
+
+
+    # created by copilot, when asked to create new tests for group.py
+    def test_getting_group_members_of_nonexistent_group(self, client):
+        "test getting group members of nonexistent group"
+        resp = client.get(f"{self.RESOURCE_URL}101/members/")
+        assert resp.status_code == 404
+        assert resp.get_json() == {"error": "Group not found"}
+
+    # created by copilot, when asked to create new tests for group.py
+    def test_adding_user_to_nonexistent_group(self, client):
+        "test adding user to nonexistent group"
+        resp = client.post(
+            f"{self.RESOURCE_URL}101/user/",
+            json={"user_id": 1, "role": "member"}
+        )
+        assert resp.status_code == 404
+        assert resp.get_json() == {"error": "Group not found"}
+
+    # created by copilot, when asked to create new tests for group.py
+    def test_adding_nonexistent_user_to_group(self, client):
+        "test adding nonexistent user to group"
+        resp = client.post(
+            f"{self.RESOURCE_URL}1/user/",
+            json={"user_id": 101, "role": "member"}
+        )
+        assert resp.status_code == 404
+        assert resp.get_json() == {"error": "User not found"}
+
+    # created by copilot, when asked to create new tests for group.py
+    def test_removing_user_from_nonexistent_group(self, client):
+        "test removing user from nonexistent group"
+        resp = client.delete(
+            f"{self.RESOURCE_URL}101/user/",
+            json={"user_id": 1}
+        )
+        assert resp.status_code == 404
+        assert resp.get_json() == {"error": "Group not found"}
+
+    # created by copilot, when asked to create new tests for group.py
+    def test_removing_nonexistent_user_from_group(self, client):
+        "test removing nonexistent user from group"
+        resp = client.delete(
+            f"{self.RESOURCE_URL}1/user/",
+            json={"user_id": 101}
+        )
+        assert resp.status_code == 404
+        assert resp.get_json() == {"error": "User not found"}
+    def test_removing_user_which_is_not_in_group(self, client):
+        "test removing user which is not in group"
+        # create group + user to add to the group
+        group_resp = client.post(
+            self.RESOURCE_URL,
+            json={"name": "Delete User Group"}
+        )
+        assert_group_message = group_resp.get_data(as_text=True)
+        assert group_resp.status_code == 201, f"Group creation failed: {assert_group_message}"
+        group_data = group_resp.get_json()
+        group_id = group_data["group_id"]
+
+        user_resp = client.post(
+            "/api/user/",
+            json={
+                "name": "Delete User",
+                "email": "delete@user",
+                "password": "deleteuserpassword"
+            }
+        )
+        assert_user_message = user_resp.get_data(as_text=True)
+        assert user_resp.status_code == 201, f"User creation failed: {assert_user_message}"
+        user_data = user_resp.get_json()
+        assert_user_data_message = {user_resp.get_data(as_text=True)}
+        message = f"User creation failed: {assert_user_data_message}"
+        assert "unique_user" in user_data, message
+        user_id = user_data["unique_user"]
+
+        resp = client.delete(
+            f"/api/group/{group_id}/user/",
+            json={"user_id": user_id}
+        )
+        assert resp.status_code == 400
+        assert resp.get_json() == {"error": "User not in group"}
 class TestTask(object):
     "Test the Task resource"
     RESOURCE_URL = "/api/task/"
@@ -735,3 +861,27 @@ class TestTask(object):
         resp = client.get(f"{self.RESOURCE_URL}{unique_task}/")
         assert resp.status_code == 404
         assert resp.get_json() == {"error": "Task not found"}
+
+    def test_create_task_with_missing_fields(self, client):
+        "test creating task with missing fields"
+        group_resp = client.post(
+            "/api/group/",
+            json={"name": "Task Group"}
+        )
+        task_group_message = group_resp.get_data(as_text=True)
+        assert group_resp.status_code == 201, f"Group creation failed: {task_group_message}"
+        group_data = group_resp.get_json()
+        group_id = group_data["group_id"]
+
+        # test creating task with missing fields
+        resp = client.post(
+            f"/api/group/{group_id}/task/",
+            json={
+                "title": "New Task",
+                "description": "Task description",
+                "status": "Pending",
+                "deadline": "2023-12-31T23:59:59"
+            }
+        )
+        assert resp.status_code == 400
+        assert resp.get_json() == {"error": "Incomplete request - missing information"}

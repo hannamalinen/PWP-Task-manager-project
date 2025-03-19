@@ -83,7 +83,7 @@ To deploy the API, follow these steps:
     ```sh
     export FLASK_APP=run.py
     export FLASK_ENV=production
-    export DATABASE_URL=your_database_url
+    export DATABASE_URL=task_management.db
     ```
 
 2. **Run database migrations**:

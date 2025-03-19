@@ -60,16 +60,16 @@ class GroupItem(Resource):
     def put(self, group_id):
         """Updates a group information of an existing group"""
         if not request.is_json:
-            return "Request content type must be JSON", 415
+            return {"error": "Request content type must be JSON"}, 415
         data = request.get_json()
         group = db.session.get(Group, group_id)
         if not group:
-            return "Error: Group not found", 404
+            return {"error": "Group not found"}, 404
         if "name" in data:
             group.name = data["name"]
         if "unique_group" in data:
             if Group.query.filter_by(unique_group=data["unique_group"]).first():
-                return "Error: unique_group already exists", 400
+                return {"error": "unique_group already exists"}, 400
             group.unique_group = data["unique_group"]
 
         db.session.commit()
