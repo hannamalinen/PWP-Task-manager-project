@@ -19,6 +19,9 @@ class AuthHeaderClient(FlaskClient):
     A test client that adds the task-manager-api-key header to all requests
     """
     def open(self, *args, **kwargs):
+        """
+        Add the task-manager-api-key header to all requests
+        """
         api_key_headers = Headers({
             'task-manager-api-key': TEST_KEY
         })
@@ -491,8 +494,10 @@ class TestGroup(object):
             f"/api/group/{group_id}/user/"
             , json={"user_id": user_id}
         )
-        print(f"Delete user response: {delete_user_resp.get_data(as_text=True)}")  # Debug information
-        assert delete_user_resp.status_code == 204, f"Deleting user from group failed: {delete_user_resp.get_data(as_text=True)}"
+        response = delete_user_resp.get_data(as_text=True)
+        print(f"Delete user response: {response}")  # Debug information
+        message = f"Deleting user from group failed: {response}"
+        assert delete_user_resp.status_code == 204, message
         #check that the group is still there
         resp = client.get(f"/api/group/{group_id}/")
         assert resp.status_code == 200

@@ -9,7 +9,9 @@ from sqlalchemy import event
 from task_manager import create_app, db
 from task_manager.models import User, Group, Task, UserGroup
 
-
+## this file is based on the db_test.py from github
+## others are prompted from copilot, mainly after errors and asked why this
+## is not working, and then it suggested the correct way to do it
 @event.listens_for(Engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
     " Set SQLite PRAGMA"
