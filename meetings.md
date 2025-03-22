@@ -50,14 +50,23 @@ The feedback we received:
 
 
 ## Meeting 3.
-* **DATE:**
-* **ASSISTANTS:**
+* **DATE:** 19.3.2025 12.30-13.00
+* **ASSISTANTS:** Mika Oja
 
 ### Minutes
 *Summary of what was discussed during the meeting*
+- we went through our github page, tested our implemention with the tests we created and ran the project with pylint -> few cyclical imports found but there's nothing much to do for those
+- validation missing for json schemas with POST and PUT
+- all the discussed action points below
 
 ### Action points
 *List here the actions points discussed with assistants*
+- Move all the POST methods from items to collections
+- Unify all the collection urls to be more plural (=yhdenmukaistakaa urleja)
+- expand all the explanations in README
+- check deployment exercise before writing instructions on deployment (klikkikomentoja yms?)
+- create tests for error codes (jos on aikaa)
+
 
 
 
