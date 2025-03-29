@@ -7,7 +7,7 @@ from task_manager.models import Group, User, UserGroup
 from task_manager import db
 
 class GroupItem(Resource):
-    " Resource class for get, post, put, delete methods for Group"
+    " Resource class for get, put, delete methods for Group"
 
     # getting group
     def get(self, group_id):
@@ -20,6 +20,51 @@ class GroupItem(Resource):
             "name": group.name,
             "unique_group": group.unique_group
         }, 200
+
+    # updating group information
+    def put(self, group_id):
+        """Updates a group information of an existing group"""
+        if not request.is_json:
+            return {"error": "Request content type must be JSON"}, 415
+        data = request.get_json()
+        group = db.session.get(Group, group_id)
+        if not group:
+            return {"error": "Group not found"}, 404
+        if "name" in data:
+            group.name = data["name"]
+        if "unique_group" in data:
+            if Group.query.filter_by(unique_group=data["unique_group"]).first():
+                return {"error": "unique_group already exists"}, 400
+            group.unique_group = data["unique_group"]
+
+        db.session.commit()
+        return {
+            "message": "Group updated successfully"
+        }, 200
+
+    # deleting group
+    def delete(self, group_id):
+        """Deletes a group by its ID"""
+        group = db.session.get(Group, group_id)
+        if not group:
+            return {"error": "Group not found"}, 404
+
+        db.session.delete(group)
+        db.session.commit()
+        return {"message": "Group deleted successfully"}, 204
+
+class GroupCollection(Resource):
+    "Resource class for get method for GroupCollection"
+    # getting all groups
+    def get(self):
+        """Get all groups"""
+        groups = Group.query.all()
+        group_list = [{
+            "id": group.id,
+            "name": group.name,
+            "unique_group": group.unique_group
+        } for group in groups]
+        return group_list, 200
 
     # creating group
     def post(self):
@@ -56,37 +101,6 @@ class GroupItem(Resource):
 
         return response_data, 201
 
-    # updating group information
-    def put(self, group_id):
-        """Updates a group information of an existing group"""
-        if not request.is_json:
-            return {"error": "Request content type must be JSON"}, 415
-        data = request.get_json()
-        group = db.session.get(Group, group_id)
-        if not group:
-            return {"error": "Group not found"}, 404
-        if "name" in data:
-            group.name = data["name"]
-        if "unique_group" in data:
-            if Group.query.filter_by(unique_group=data["unique_group"]).first():
-                return {"error": "unique_group already exists"}, 400
-            group.unique_group = data["unique_group"]
-
-        db.session.commit()
-        return {
-            "message": "Group updated successfully"
-        }, 200
-
-    # deleting group
-    def delete(self, group_id):
-        """Deletes a group by its ID"""
-        group = db.session.get(Group, group_id)
-        if not group:
-            return {"error": "Group not found"}, 404
-
-        db.session.delete(group)
-        db.session.commit()
-        return {"message": "Group deleted successfully"}, 204
 
 class GroupMembers(Resource):
     "Resource class for get method for GroupMembers"
@@ -107,6 +121,20 @@ class GroupMembers(Resource):
 class UserToGroup(Resource):
     "Resource class for post method for UserToGroup"
     # adding user to group
+    def get(self, group_id):
+        """Get all members of a group by group ID."""
+        group = db.session.get(Group, group_id)
+        if not group:
+            return {"error": "Group not found"}, 404
+        members = group.user_groups
+        return [{
+            "id": member.user.id,
+            "name": member.user.name,
+            "email": member.user.email,
+            "role": member.role
+        } for member in members
+        ], 200
+
     def post(self, group_id):
         """Add a user to a group."""
         if not request.is_json:
@@ -165,3 +193,30 @@ class UserToGroup(Resource):
         db.session.commit()
 
         return {"message": "User removed from group successfully"}, 204
+
+    def put(self, group_id):
+        """Update a user's role in a group."""
+        if not request.is_json:
+            return {"error": "Request content type must be JSON"}, 415
+        try:
+            user_id = request.json["user_id"]
+            role = request.json["role"]
+        except KeyError:
+            return {"error": "Incomplete request - missing fields"}, 400
+
+        group = db.session.get(Group, group_id)
+        if not group:
+            return {"error": "Group not found"}, 404
+
+        user = User.query.filter_by(unique_user=user_id).first()
+        if not user:
+            return {"error": "User not found"}, 404
+
+        user_group = UserGroup.query.filter_by(user_id=user.id, group_id=group_id).first()
+        if not user_group:
+            return {"error": "User not in group"}, 400
+
+        user_group.role = role
+        db.session.commit()
+
+        return {"message": "User role updated successfully"}, 200

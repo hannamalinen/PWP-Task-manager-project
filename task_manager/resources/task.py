@@ -6,16 +6,18 @@ from flask_restful import Resource
 from task_manager.models import Task, Group, UserGroup
 from task_manager import db
 
+class GroupTaskCollection(Resource):
+    """Resource class for get method for GroupTaskCollection"""
 
-class TaskItem(Resource):
-    """Resource class for get, post, put, delete methods for Task"""
-
-    def get(self, unique_task):
-        """Get a task by its unique_task and returns the whole task"""
-        task = Task.query.filter_by(unique_task=unique_task).first()
-        if not task:
-            return {"error": "Task not found"}, 404
-        return {
+    def get(self, group_id):
+        """Get all tasks of a group"""
+        group = db.session.get(Group, group_id)
+        if not group:
+            return {"error": "Group not found"}, 404
+        user_groups = UserGroup.query.filter_by(group_id=group_id).all()
+        usergroup_ids = [ug.id for ug in user_groups]
+        tasks = Task.query.filter(Task.usergroup_id.in_(usergroup_ids)).all()
+        return [{
             "id": task.id,
             "title": task.title,
             "description": task.description,
@@ -24,7 +26,7 @@ class TaskItem(Resource):
             "created_at": task.created_at.isoformat(),
             "updated_at": task.updated_at.isoformat(),
             "usergroup_id": task.usergroup_id
-        }, 200
+        } for task in tasks], 200
         # there was also in LoveLace about isoformat, but copilot helped us to implement it
 
     def post(self, group_id):
@@ -73,14 +75,50 @@ class TaskItem(Resource):
             "unique_task": new_uuid
         }, 201
 
-    def put(self, unique_task):
+class GroupTaskItem(Resource):
+    """Resource class for get, put, delete methods for Task"""    
+    def get(self, group_id, unique_task):
+        """Get a task by its unique_task and returns the whole task"""
+        group = db.session.get(Group, group_id)
+        if not group:
+            return {"error": "Group not found"}, 404
+
+        user_group = UserGroup.query.filter_by(group_id=group_id).first()
+        if not user_group:
+            return {"error": "UserGroup not found for the given group"}, 404
+
+        usergroup_id = user_group.id
+        task = Task.query.filter_by(unique_task=unique_task, usergroup_id=usergroup_id).first()
+        if not task:
+            return {"error": "Task not found"}, 404
+        return {
+            "id": task.id,
+            "title": task.title,
+            "description": task.description,
+            "status": task.status,
+            "deadline": task.deadline.isoformat(),
+            "created_at": task.created_at.isoformat(),
+            "updated_at": task.updated_at.isoformat(),
+            "usergroup_id": task.usergroup_id
+        }, 200
+    def put(self, group_id, unique_task):
         """Updates a task information of an existing task"""
         if not request.is_json:
             return {"error": "Request content type must be JSON"}, 415
         data = request.get_json()
-        task = Task.query.filter_by(unique_task=unique_task).first()
+        group = db.session.get(Group, group_id)
+        if not group:
+            return {"error": "Group not found"}, 404
+
+        user_group = UserGroup.query.filter_by(group_id=group_id).first()
+        if not user_group:
+            return {"error": "UserGroup not found for the given group"}, 404
+
+        usergroup_id = user_group.id
+        task = Task.query.filter_by(unique_task=unique_task, usergroup_id=usergroup_id).first()
         if not task:
             return {"error": "Task not found"}, 404
+
         if "title" in data:
             task.title = data["title"]
         if "description" in data:
@@ -93,57 +131,26 @@ class TaskItem(Resource):
                 task.deadline = datetime.fromisoformat(data["deadline"])
             except ValueError:
                 return invalid_format_message, 400
-        # there was also in LoveLace about isoformat, but copilot helped us to implement it
 
         task.updated_at = datetime.now()
         db.session.commit()
         return {"message": "Task updated successfully"}, 200
 
-    def delete(self, unique_task):
+    def delete(self, group_id, unique_task):
         """Deletes a task by its unique_task"""
-        task = Task.query.filter_by(unique_task=unique_task).first()
+        group = db.session.get(Group, group_id)
+        if not group:
+            return {"error": "Group not found"}, 404
+
+        user_group = UserGroup.query.filter_by(group_id=group_id).first()
+        if not user_group:
+            return {"error": "UserGroup not found for the given group"}, 404
+
+        usergroup_id = user_group.id
+        task = Task.query.filter_by(usergroup_id=usergroup_id).first()
         if not task:
             return {"error": "Task not found"}, 404
 
         db.session.delete(task)
         db.session.commit()
         return {"message": "Task deleted successfully"}, 204
-
-class TaskCollection(Resource):
-    """Resource class for get, post methods for Task"""
-    def get(self):
-        """Get all tasks and returns a list of tasks"""
-        tasks = Task.query.all()
-        task_list = [{"id": task.id,
-                      "title": task.title, 
-                      "description": task.description, 
-                      "status": task.status, 
-                      "deadline": task.deadline.isoformat(), 
-                      "created_at": task.created_at.isoformat(), 
-                      "updated_at": task.updated_at.isoformat(), 
-                      "usergroup_id": task.usergroup_id} for task in tasks]
-        return task_list, 200
-    # there was also in LoveLace about isoformat, but copilot helped us to implement it
-
-class GroupTaskCollection(Resource):
-    """Resource class for get method for GroupTaskCollection"""
-
-    def get(self, group_id):
-        """Get all tasks of a group"""
-        group = db.session.get(Group, group_id)
-        if not group:
-            return {"error": "Group not found"}, 404
-        user_groups = UserGroup.query.filter_by(group_id=group_id).all()
-        usergroup_ids = [ug.id for ug in user_groups]
-        tasks = Task.query.filter(Task.usergroup_id.in_(usergroup_ids)).all()
-        return [{
-            "id": task.id,
-            "title": task.title,
-            "description": task.description,
-            "status": task.status,
-            "deadline": task.deadline.isoformat(),
-            "created_at": task.created_at.isoformat(),
-            "updated_at": task.updated_at.isoformat(),
-            "usergroup_id": task.usergroup_id
-        } for task in tasks], 200
-        # there was also in LoveLace about isoformat, but copilot helped us to implement it

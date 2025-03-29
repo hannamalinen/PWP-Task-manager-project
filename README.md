@@ -44,23 +44,20 @@ myenv\Scripts\activate
 pip install -r requirements.txt
 
 ## Creating the database
-Go to python console with command:
-python
+If wanted to test manually, these commands are needed:
 
-After entering the python console, you can give these commands to create a database:
-from app import db
-from app import app
-ctx = app.app_context()
-ctx.push()
-db.create_all()
-ctx.pop()
-
+export FLASK_APP=task_manager
+flask init-db
 After creating a database, start another terminal and run this command:
 flask run
 Then we can start with our database and give commands to it! Our HTTP address is 127.0.0.1/5000
 
 ![Näyttökuva 2025-02-09 kello 16 00 48](https://github.com/user-attachments/assets/c937b2db-a4ef-4f5b-b46b-7e1b34c7bca0)
 
+# Removing the database
+This is needed when testing endpoints manually.
+source venv/bin/activate
+rm instance/task_management.db
 
 ## Populating the database
 Data can be sent using curl-commands or Postman. We mainly used curl-commands at this point
