@@ -1,0 +1,518 @@
+---
+openapi: 3.0.3
+info:
+  title: Task Manager API
+  version: 1.0.0
+  description: |
+    This is documentation for our Task Manager API. Our API allows you to manage users, groups, and tasks effectively :+)
+servers:
+  - url: /api
+components:
+  parameters:
+    uniqueUser:
+      name: unique_user
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Unique identifier for user
+    groupId:
+      name: group_id
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: Unique identifier for group
+    uniqueTask:
+      name: unique_task
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Unique identifier for task
+  schemas:
+    User:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the user
+        email:
+          type: string
+          description: Email of the user
+        password:
+          type: string
+          description: Password of the user
+        unique_user:
+          type: string
+          description: Unique identifier for the user
+      required:
+        - name
+        - email
+        - password
+    Group:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the group
+        unique_group:
+          type: string
+          description: Unique identifier for the group
+      required:
+        - name
+    Task:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Title of the task
+        description:
+          type: string
+          description: Description of the task
+        status:
+          type: integer
+          description: Status of the task
+        deadline:
+          type: string
+          format: date-time
+          description: Deadline of the task
+        created_at:
+          type: string
+          format: date-time
+          description: Creation time of the task
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update time of the task
+        unique_task:
+          type: string
+          description: Unique identifier for the task
+      required:
+        - title
+        - description
+        - status
+        - deadline
+        - created_at
+        - updated_at
+  securitySchemes:
+    apiKeyAuth:
+      type: apiKey
+      name: task-manager-api-key
+      in: header
+paths:
+  /users/:
+    get:
+      summary: Get all users
+      responses:
+        '200':
+          description: List of all users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+              example:
+                - name: Teppo Testaaja
+                  email: teppo.testaaja@testaaja.com
+                  unique_user: abc123
+                - name: Tiina Toimari
+                  email: tiina.toimari@testaaja.com
+                  unique_user: def456
+    post:
+      summary: Create new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+            example:
+              name: Teppo Testaaja
+              email: teppo.testaaja@testaajat.com
+              password: salakala123
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              example:
+                message: User added successfully
+                unique_user: abc123
+        '400':
+          description: Missing or invalid fields in the request body
+        '415':
+          description: Unsupported media type
+  /users/{unique_user}/:
+    parameters:
+      - $ref: '#/components/parameters/uniqueUser'
+    get:
+      summary: Get a user by unique_user
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              example:
+                name: Teppo Testaaja
+                email: teppo.testaaja@testaaja.com
+                unique_user: abc123
+        '404':
+          description: User not found
+    put:
+      summary: Update user's information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+            example:
+              name: Teppo Testaaja updated
+              email: teppo.testaaja.updated@testaaja.com
+              password: uussalakala123
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              example:
+                message: User updated successfully
+        '404':
+          description: User not found
+        '415':
+          description: Unsupported media type
+    delete:
+      summary: Delete user
+      responses:
+        '204':
+          description: User deleted successfully
+        '404':
+          description: User not found
+  /groups/:
+    get:
+      summary: Get all groups
+      responses:
+        '200':
+          description: List of all groups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+              example:
+                - name: Testaajat
+                  unique_group: testaajat123
+                - name: Toimarit
+                  unique_group: toimarit456
+    post:
+      summary: Create new group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+            example:
+              name: Testaajat
+              unique_group: testaajat123
+      responses:
+        '201':
+          description: Group created successfully
+          content:
+            application/json:
+              example:
+                message: Group added successfully
+                group_id: 1
+                unique_group: testaajat123
+        '400':
+          description: Missing or invalid fields in request body
+        '415':
+          description: Unsupported media type
+  /groups/{group_id}/:
+    parameters:
+      - $ref: '#/components/parameters/groupId'
+    get:
+      summary: Get group by group_id
+      responses:
+        '200':
+          description: Group details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+              example:
+                name: Testaajat
+                unique_group: testaajat123
+        '404':
+          description: Group not found
+    put:
+      summary: Update group's information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+            example:
+              name: Testaajat updated
+              unique_group: testaajat123updated
+      responses:
+        '200':
+          description: Group updated successfully
+          content:
+            application/json:
+              example:
+                message: Group updated successfully
+        '404':
+          description: Group not found
+        '415':
+          description: Unsupported media type
+    delete:
+      summary: Delete group
+      responses:
+        '204':
+          description: Group deleted successfully
+        '404':
+          description: Group not found
+  /groups/{group_id}/tasks/:
+    parameters:
+      - $ref: '#/components/parameters/groupId'
+    get:
+      summary: Get all tasks in group
+      responses:
+        '200':
+          description: List of all tasks in group
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+              example:
+                - title: Task 1
+                  description: Description of task 1
+                  status: 1
+                  deadline: 2025-12-31T23:59:59
+                  created_at: 2025-01-01T00:00:00
+                  updated_at: 2025-01-01T00:00:00
+                  unique_task: task123
+                - title: Task 2
+                  description: Description of task 2
+                  status: 2
+                  deadline: 2025-12-31T23:59:59
+                  created_at: 2025-01-01T00:00:00
+                  updated_at: 2025-01-01T00:00:00
+                  unique_task: task456
+    post:
+      summary: Create a new task in group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Task'
+            example:
+              title: Task 1
+              description: Description of task 1
+              status: 1
+              deadline: 2025-12-31T23:59:59
+              created_at: 2025-01-01T00:00:00
+              updated_at: 2025-01-01T00:00:00
+      responses:
+        '201':
+          description: Task created successfully
+          content:
+            application/json:
+              example:
+                message: Task added successfully
+                unique_task: task123
+        '400':
+          description: Missing or invalid fields in request body
+        '415':
+          description: Unsupported media type
+  /groups/{group_id}/tasks/{unique_task}/:
+    parameters:
+      - $ref: '#/components/parameters/groupId'
+      - $ref: '#/components/parameters/uniqueTask'
+    get:
+      summary: Get task by unique_task
+      responses:
+        '200':
+          description: Task details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+              example:
+                title: Task 1
+                description: Description of task 1
+                status: 1
+                deadline: 2025-12-31T23:59:59
+                created_at: 2025-01-01T00:00:00
+                updated_at: 2025-01-01T00:00:00
+                unique_task: task123
+        '404':
+          description: Task not found
+    put:
+      summary: Update task's information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Task'
+            example:
+              title: Task 1 Updated
+              description: Updated description of task 1
+              status: 2
+              deadline: 2025-12-31T23:59:59
+              created_at: 2025-01-01T00:00:00
+              updated_at: 2025-01-01T00:00:00
+      responses:
+        '200':
+          description: Task updated successfully
+          content:
+            application/json:
+              example:
+                message: Task updated successfully
+        '404':
+          description: Task not found
+        '415':
+          description: Unsupported media type
+    delete:
+      summary: Delete a task
+      responses:
+        '204':
+          description: Task deleted successfully
+        '404':
+          description: Task not found
+  /groups/{group_id}/members/:
+    parameters:
+      - $ref: '#/components/parameters/groupId'
+    get:
+      summary: Get all members of group
+      responses:
+        '200':
+          description: List of all members in the group
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      description: User ID
+                    name:
+                      type: string
+                      description: Name of the user
+                    email:
+                      type: string
+                      description: Email of the user
+                    role:
+                      type: string
+                      description: Role of the user in the group
+              example:
+                - id: 1
+                  name: Teppo Testaaja
+                  email: teppo.testaaja@testaaja.com
+                  role: admin
+                - id: 2
+                  name: Tiina Toimari
+                  email: tiina.toimari@testaaja.com
+                  role: member
+        '404':
+          description: Group not found
+  /groups/{group_id}/user/:
+    parameters:
+      - $ref: '#/components/parameters/groupId'
+    post:
+      summary: Add user to group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                  description: Unique identifier for the user
+                role:
+                  type: string
+                  description: Role of the user in the group
+              required:
+                - user_id
+                - role
+            example:
+              user_id: abc123
+              role: member
+      responses:
+        '201':
+          description: User added to the group successfully
+          content:
+            application/json:
+              example:
+                message: User added to group successfully
+        '400':
+          description: User is already in group or missing fields in the request body
+        '404':
+          description: Group or user not found
+        '415':
+          description: Unsupported media type
+    delete:
+      summary: Remove a user from group
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Unique identifier for the user
+      responses:
+        '204':
+          description: User removed from the group successfully
+        '400':
+          description: User not in group or missing fields in the request
+        '404':
+          description: Group or user not found
+    put:
+      summary: Update user's role in group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: string
+                  description: Unique identifier for the user
+                role:
+                  type: string
+                  description: New role of the user in the group
+              required:
+                - user_id
+                - role
+            example:
+              user_id: abc123
+              role: admin
+      responses:
+        '200':
+          description: User role updated successfully
+          content:
+            application/json:
+              example:
+                message: User role updated successfully
+        '400':
+          description: User not in group or missing fields in the request body
+        '404':
+          description: Group or user not found
+        '415':
+          description: Unsupported media type
