@@ -125,12 +125,11 @@ class GroupTaskItem(Resource):
             task.description = data["description"]
         if "status" in data:
             task.status = data["status"]
-        invalid_format_message = "Invalid deadline format. Use ISO format (YYYY-MM-DDTHH:MM:SS)"
         if "deadline" in data:
             try:
                 task.deadline = datetime.fromisoformat(data["deadline"])
             except ValueError:
-                return invalid_format_message, 400
+                return {"error": "Invalid deadline format. Use ISO format (YYYY-MM-DDTHH:MM:SS)"}, 400
 
         task.updated_at = datetime.now()
         db.session.commit()
@@ -138,19 +137,23 @@ class GroupTaskItem(Resource):
 
     def delete(self, group_id, unique_task):
         """Deletes a task by its unique_task"""
+        # Check if the group exists
         group = db.session.get(Group, group_id)
         if not group:
             return {"error": "Group not found"}, 404
 
+        # Find the user group associated with the group_id
         user_group = UserGroup.query.filter_by(group_id=group_id).first()
         if not user_group:
             return {"error": "UserGroup not found for the given group"}, 404
 
+        # Find the task associated with the unique_task and usergroup_id
         usergroup_id = user_group.id
-        task = Task.query.filter_by(usergroup_id=usergroup_id).first()
+        task = Task.query.filter_by(unique_task=unique_task, usergroup_id=usergroup_id).first()
         if not task:
             return {"error": "Task not found"}, 404
 
+        # Delete the task
         db.session.delete(task)
         db.session.commit()
         return {"message": "Task deleted successfully"}, 204

@@ -102,22 +102,6 @@ class GroupCollection(Resource):
         return response_data, 201
 
 
-class GroupMembers(Resource):
-    "Resource class for get method for GroupMembers"
-    # getting group members
-    def get(self, group_id):
-        """Get all members of a group by group ID."""
-        group = db.session.get(Group, group_id)
-        if not group:
-            return {"error": "Group not found"}, 404
-        members = group.user_groups
-        return [{
-            "id": member.user.id,
-            "name": member.user.name,
-            "email": member.user.email,
-            "role": member.role
-        } for member in members], 200
-
 class UserToGroup(Resource):
     "Resource class for post method for UserToGroup"
     # adding user to group
@@ -158,7 +142,7 @@ class UserToGroup(Resource):
         # debug information - copilot created this line while helping us debug
         print(f"Adding User ID: {user_id} to Group ID: {group_id}")
 
-        if UserGroup.query.filter_by(user_id=user.id, group_id=group_id).first():
+        if UserGroup.query.filter_by(user_id=user_id, group_id=group_id).first():
             return {"error": "User already in group"}, 400
 
         user_group = UserGroup(user_id=user.id, group_id=group_id, role=role)
