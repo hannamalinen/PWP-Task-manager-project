@@ -22,7 +22,7 @@ import pytest
 from flask.testing import FlaskClient
 from werkzeug.datastructures import Headers
 from task_manager import create_app, db
-from task_manager.models import User, Group, ApiKey
+from task_manager.models import User, Group, ApiKey, UserGroup
 
 TEST_KEY = "tepontarinat"
 
@@ -542,20 +542,13 @@ class TestUserToGroup(object):
         assert resp.get_json() == {"message": "User added to group successfully"}
 
     def test_deleting_user_from_group(self, client):
-        # this is created by Copilot mainly. The first part is taken from the above test,
-        # test_adding_user_to_group. Copilot did not want to use the unique id,
-        # it always suggested to use user.id.
-        # Few tests in the end ensures that even the user is deleted
-        # from the group, the user is still in the database, but not in the group.
         "test deleting user from group"
-        # create group + user to add to the group
-
+        # Create group + user to add to the group
         group_resp = client.post(
             self.RESOURCE_URL,
             json={"name": "Delete User Group"}
         )
-        assert_group_message = group_resp.get_data(as_text=True)
-        assert group_resp.status_code == 201, f"Group creation failed: {assert_group_message}"
+        assert group_resp.status_code == 201, f"Group creation failed: {group_resp.get_data(as_text=True)}"
         group_data = group_resp.get_json()
         group_id = group_data["group_id"]
 
@@ -567,26 +560,15 @@ class TestUserToGroup(object):
                 "password": "deleteuserpassword"
             }
         )
-        assert_user_message = user_resp.get_data(as_text=True)
-        assert user_resp.status_code == 201, f"User creation failed: {assert_user_message}"
+        assert user_resp.status_code == 201, f"User creation failed: {user_resp.get_data(as_text=True)}"
         user_data = user_resp.get_json()
-        assert_user_data_message = {user_resp.get_data(as_text=True)}
-        message = f"User creation failed: {assert_user_data_message}"
-        assert "unique_user" in user_data, message
         user_id = user_data["unique_user"]
 
-        # commit the user to the database
+        # Commit the user to the database
         with client.application.app_context():
             db.session.commit()
 
-        # a delay to allow the database to process the commit
-        # - copilot created this to help debug the test
-        time.sleep(1)
-
-        # debug information  - copilot created this to help debug the test
-        print(f"User ID: {user_id}")
-
-        # test adding the user to group
+        # Add the user to the group
         resp = client.post(
             f"/api/groups/{group_id}/user/",
             json={"user_id": user_id, "role": "member"}
@@ -596,19 +578,26 @@ class TestUserToGroup(object):
         assert resp.status_code == 201, message
         assert resp.get_json() == {"message": "User added to group successfully"}
 
-        # delete the user from the group
+        # Verify the user is in the group
+        with client.application.app_context():
+            user_group = UserGroup.query.filter_by(user_id=user_id, group_id=group_id).first()
+            assert user_group is not None, "User was not added to the group"
+
+        # Delete the user from the group
         delete_user_resp = client.delete(
-            f"/api/groups/{group_id}/user/"
-            , json={"user_id": user_id}
+            f"/api/groups/{group_id}/user/",
+            json={"user_id": user_id}
         )
         response = delete_user_resp.get_data(as_text=True)
         print(f"Delete user response: {response}")  # Debug information
         message = f"Deleting user from group failed: {response}"
         assert delete_user_resp.status_code == 204, message
-        #check that the group is still there
+
+        # Check that the group is still there
         resp = client.get(f"/api/groups/{group_id}/")
         assert resp.status_code == 200
-        # check that the user is still there, but not in the group
+
+        # Check that the user is still there, but not in the groups
         resp = client.get(f"/api/users/{user_id}/")
         assert resp.status_code == 200
 

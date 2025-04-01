@@ -194,7 +194,7 @@ class Group(db.Model):
 class UserGroup(db.Model):
     """ UserGroup database model, models from ex. 1 """
     id = db.Column(db.Integer, primary_key=True)
-    unique_user = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
     # ondelete='CASCADE' is used to delete all the rows in the child
     # table when the referenced row in the parent table is deleted
     group_id = db.Column(db.Integer, db.ForeignKey('group.id', ondelete='CASCADE'), nullable=False)

@@ -142,10 +142,10 @@ class UserToGroup(Resource):
         # debug information - copilot created this line while helping us debug
         print(f"Adding User ID: {user_id} to Group ID: {group_id}")
 
-        if UserGroup.query.filter_by(user_id=user_id, group_id=group_id).first():
+        if UserGroup.query.filter_by(user_id=user.id, group_id=group_id).first():
             return {"error": "User already in group"}, 400
 
-        user_group = UserGroup(user_id=user.id, group_id=group_id, role=role)
+        user_group = UserGroup(user_id=user_id, group_id=group_id, role=role)
         db.session.add(user_group)
         db.session.commit()
 
