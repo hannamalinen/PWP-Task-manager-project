@@ -1,4 +1,9 @@
 from mason_builder import MasonBuilder
+from flask import url_for
+from task_manager.constants import *
+from task_manager.models import *
+from
+
 
 class MasonBuilder(dict):
     """
@@ -124,4 +129,125 @@ class MasonBuilder(dict):
             method="DELETE",
             title=title,
         )
+
+def get_user_collection():
+    """
+    Returns a collection of users with hypermedia controls.
+    """
+    users = User.query.all()
+    response = MasonBuilder({
+        "items": [
+            {
+                "id": user.id,
+                "name": user.name,
+                "email": user.email,
+                "_links": {
+                    "self": {"href": f"/api/users/{user.id}"}
+                }
+            }
+            for user in users
+        ]
+    })
+
+    # Add controls for the collection
+    response.add_control("self", href="/api/users/")
+    response.add_control_post(
+        "add-user",
+        title="Add a new user",
+        href="/api/users/",
+        schema={
+            "type": "object",
+            "properties": {
+                "name": {"type": "string"},
+                "email": {"type": "string"},
+                "password": {"type": "string"}
+            },
+            "required": ["name", "email", "password"]
+        }
+    )
+    return response
+
+
+class RespondBody(MasonBuilder):
+    """
+    A subclass of MasonBuilder that represents a response body for a
+    specific resource. This class is used to build the response body
+    for the user resource.
+    """
+
+    @staticmethod
+    def user_item(user):
+        """
+        Returns a Mason+JSON response for a single user with hypermedia controls.
+        :param user: The user object to include in the response.
+        """
+        if not user:
+            response = RespondBody()
+            response.add_error("User not found", "The requested user does not exist.")
+            return response, 404
+
+        response = RespondBody({
+            "id": user.id,
+            "name": user.name,
+            "email": user.email
+        })
+
+        # Add hypermedia controls for the user item
+        response.add_control("self", href=url_for("api.get_user", user_id=user.id, _external=True))
+        response.add_control_put(
+            title="Edit user details",
+            href=url_for("api.get_user", user_id=user.id, _external=True),
+            schema={
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "email": {"type": "string"},
+                    "password": {"type": "string"}
+                },
+                "required": ["name", "email"]
+            }
+        )
+        response.add_control_delete(
+            title="Delete this user",
+            href=url_for("api.get_user", user_id=user.id, _external=True)
+        )
+        return response
+
+    @staticmethod
+    def user_collection(users):
+        """
+        Returns a Mason+JSON response for a collection of users with hypermedia controls.
+        :param users: A list of user objects to include in the response.
+        """
+        response = RespondBody({
+            "items": [
+                {
+                    "id": user.id,
+                    "name": user.name,
+                    "email": user.email,
+                    "_links": {
+                        "self": {"href": url_for("api.get_user", user_id=user.id, _external=True)}
+                    }
+                }
+                for user in users
+            ]
+        })
+
+        # Add hypermedia controls for the user collection
+        response.add_control("self", href=url_for("api.get_user_collection", _external=True))
+        response.add_control_post(
+            "add-user",
+            title="Add a new user",
+            href=url_for("api.create_user", _external=True),
+            schema={
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "email": {"type": "string"},
+                    "password": {"type": "string"}
+                },
+                "required": ["name", "email", "password"]
+            }
+        )
+        return response
 
