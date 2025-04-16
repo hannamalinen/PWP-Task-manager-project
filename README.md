@@ -79,7 +79,6 @@ To deploy the API, follow these steps:
 1. **Set up environment variables**:
     ```sh
     export FLASK_APP=run.py
-    export FLASK_ENV=production
     export DATABASE_URL=task_management.db
     ```
 

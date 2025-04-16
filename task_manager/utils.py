@@ -2,7 +2,6 @@ from mason_builder import MasonBuilder
 from flask import url_for
 from task_manager.constants import *
 from task_manager.models import *
-from
 
 
 class MasonBuilder(dict):
@@ -150,7 +149,7 @@ def get_user_collection():
     })
 
     # Add controls for the collection
-    response.add_control("self", href="/api/users/")
+    response.add_control("self", href=USER_COLLECTION_PATH)
     response.add_control_post(
         "add-user",
         title="Add a new user",
@@ -187,16 +186,16 @@ class RespondBody(MasonBuilder):
             return response, 404
 
         response = RespondBody({
-            "id": user.id,
+            "id": user.unique_user,
             "name": user.name,
             "email": user.email
         })
 
         # Add hypermedia controls for the user item
-        response.add_control("self", href=url_for("api.get_user", user_id=user.id, _external=True))
+        response.add_control("self", href=url_for("api.get_user", user_id=user.unique_user, _external=True))
         response.add_control_put(
             title="Edit user details",
-            href=url_for("api.get_user", user_id=user.id, _external=True),
+            href=url_for("api.get_user", user_id=user.unique_user, _external=True),
             schema={
                 "type": "object",
                 "properties": {
@@ -209,7 +208,7 @@ class RespondBody(MasonBuilder):
         )
         response.add_control_delete(
             title="Delete this user",
-            href=url_for("api.get_user", user_id=user.id, _external=True)
+            href=url_for("api.get_user", user_id=user.unique_user, _external=True)
         )
         return response
 
@@ -222,11 +221,11 @@ class RespondBody(MasonBuilder):
         response = RespondBody({
             "items": [
                 {
-                    "id": user.id,
+                    "id": user.unique_user,  # Use unique_user instead of id
                     "name": user.name,
                     "email": user.email,
                     "_links": {
-                        "self": {"href": url_for("api.get_user", user_id=user.id, _external=True)}
+                        "self": {"href": url_for("api.get_user", user_id=user.unique_user, _external=True)}
                     }
                 }
                 for user in users
