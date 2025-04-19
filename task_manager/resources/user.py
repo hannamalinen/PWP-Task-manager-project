@@ -32,11 +32,19 @@ class UserItem(Resource):
         user = User.query.filter_by(unique_user=unique_user).first()
         if not user:
             return {"error": "User not found"}, 404
+        #valdating the data
         if "name" in data:
+            if not isinstance(data["name"], str):
+                return {"error": "Name must be a string"}, 400
             user.name = data["name"]
+            
         if "email" in data:
+            if not isinstance(data["email"], str):
+                return {"error": "Email must be a string"}, 400
             user.email = data["email"]
         if "password" in data:
+            if not isinstance(data["password"], str):
+                return {"error": "Password must be a string"}, 400
             user.password = data["password"]
 
         db.session.commit()
@@ -45,9 +53,7 @@ class UserItem(Resource):
         }, 200
 
     def delete(self, unique_user):
-
         "Deletes a user"
-
         user = User.query.filter_by(unique_user=unique_user).first()
         if not user:
             return {"error": "User not found"}, 404

@@ -31,6 +31,8 @@ class GroupItem(Resource):
         if not group:
             return {"error": "Group not found"}, 404
         if "name" in data:
+            if not isinstance(data["name"], str):
+                return {"error": "Name must be a string"}, 400
             group.name = data["name"]
         if "unique_group" in data:
             if Group.query.filter_by(unique_group=data["unique_group"]).first():

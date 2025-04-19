@@ -1,4 +1,3 @@
-from mason_builder import MasonBuilder
 from flask import url_for
 from task_manager.constants import *
 from task_manager.models import *
@@ -141,7 +140,7 @@ def get_user_collection():
                 "name": user.name,
                 "email": user.email,
                 "_links": {
-                    "self": {"href": f"/api/users/{user.id}"}
+                    "self": {"href": f"/api/users/{unique_user}"}
                 }
             }
             for user in users

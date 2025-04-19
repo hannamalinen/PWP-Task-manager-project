@@ -810,7 +810,7 @@ class TestGroupTaskItem(object):
             json={
                 "title": "New Task",
                 "description": "Task description",
-                "status": "Pending",
+                "status": "0",
                 "deadline": "2023-12-31T23:59:59",
                 "created_at": "2023-01-01T00:00:00",
                 "updated_at": "2023-01-01T00:00:00"
@@ -826,7 +826,7 @@ class TestGroupTaskItem(object):
             json={
                 "title": "Updated Task",
                 "description": "Updated description",
-                "status": "Completed",
+                "status": 1,
                 "deadline": "2023-12-31T23:59:59"
             }
         )
@@ -839,7 +839,7 @@ class TestGroupTaskItem(object):
         updated_task = resp.get_json()
         assert updated_task["title"] == "Updated Task"
         assert updated_task["description"] == "Updated description"
-        assert updated_task["status"] == "Completed"
+        assert updated_task["status"] == 1
 
     def test_delete_task(self, client):
         "test deleting task from the database"

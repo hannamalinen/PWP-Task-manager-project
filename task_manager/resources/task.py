@@ -120,10 +120,16 @@ class GroupTaskItem(Resource):
             return {"error": "Task not found"}, 404
 
         if "title" in data:
+            if not isinstance(data["title"], str):
+                return {"error": "Title must be a string"}, 400
             task.title = data["title"]
         if "description" in data:
+            if not isinstance(data["description"], str):
+                return {"error": "Description must be a string"}, 400
             task.description = data["description"]
         if "status" in data:
+            if not isinstance(data["status"], int):
+                return {"error": "Status must be an integer"}, 400
             task.status = data["status"]
         if "deadline" in data:
             try:
