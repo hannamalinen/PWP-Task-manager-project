@@ -3,6 +3,7 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_caching import Cache
+from flask_cors import CORS  # Import CORS
 
 # from Lovelace ->
 # https://lovelace.oulu.fi/ohjelmoitava-web/ohjelmoitava-web/flask-api-project-layout/
@@ -39,6 +40,9 @@ def create_app(test_config=None):
 
     db.init_app(app)
     cache.init_app(app)
+
+    # Enable CORS for all routes
+    CORS(app)
 
     from . import models
     from . import api

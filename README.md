@@ -116,3 +116,8 @@ To deploy the API, follow these steps:
     ```sh
     pytest tests/api_test.py
     ```
+# Starting the client
+First the flask app needs to be running, this is instructed above. After that:
+cd client
+npm start
+Now the client is running in localhost:3000!
