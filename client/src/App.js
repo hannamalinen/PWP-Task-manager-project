@@ -6,10 +6,21 @@ import './App.css';
 
 function App() {
     const [selectedGroup, setSelectedGroup] = useState(null);
+    const [tasks, setTasks] = useState([]); // State to manage tasks
+    const [taskToEdit, setTaskToEdit] = useState(null);
 
     const handleTaskCreated = (newTask) => {
         console.log("New task created:", newTask);
-        // Optionally, update the task list in TasksPanel
+        setTasks((prevTasks) => [...prevTasks, newTask]); // Add the new task to the list
+    };
+
+    const handleTaskUpdated = (updatedTask) => {
+        console.log("Task updated:", updatedTask);
+        setTasks((prevTasks) =>
+            prevTasks.map((task) =>
+                task.id === updatedTask.id ? updatedTask : task
+            )
+        ); // Update the task in the list
     };
 
     return (
@@ -19,8 +30,17 @@ function App() {
                 <GroupsPanel onGroupSelect={setSelectedGroup} />
                 {selectedGroup && (
                     <>
-                        <TasksPanel groupId={selectedGroup} />
-                        <CreateTaskForm groupId={selectedGroup} onTaskCreated={handleTaskCreated} />
+                        <TasksPanel
+                            groupId={selectedGroup}
+                            tasks={tasks}
+                            onEditTask={(task) => setTaskToEdit(task)}
+                        />
+                        <CreateTaskForm
+                            groupId={selectedGroup}
+                            taskToEdit={taskToEdit}
+                            onTaskCreated={handleTaskCreated}
+                            onTaskUpdated={handleTaskUpdated}
+                        />
                     </>
                 )}
             </div>
