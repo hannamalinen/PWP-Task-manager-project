@@ -41,7 +41,7 @@ function TasksPanel({ groupId, onEditTask, onDeleteTask }) {
                             <strong>Deadline:</strong> {new Date(task.deadline).toLocaleString()} <br />
                             <strong>Created At:</strong> {new Date(task.created_at).toLocaleString()} <br />
                             <strong>Updated At:</strong> {new Date(task.updated_at).toLocaleString()} <br />
-                            <button onClick={() => onEditTask(task)}>Edit</button>
+                            <button onClick={() => onEditTask(task.unique_task)}>Edit</button>
                             <button onClick={() => handleDelete(task.unique_task)}>Delete</button>
                         </li>
                     ))

@@ -19,6 +19,7 @@ class GroupTaskCollection(Resource):
         tasks = Task.query.filter(Task.usergroup_id.in_(usergroup_ids)).all()
         return [{
             "id": task.id,
+            "unique_task": task.unique_task,
             "title": task.title,
             "description": task.description,
             "status": task.status,
@@ -70,6 +71,8 @@ class GroupTaskCollection(Resource):
             )
         db.session.add(task)
         db.session.commit()
+        
+        print(f"Task created with unique_task: {new_uuid}")
         return {
             "message": "Task added successfully",
             "unique_task": new_uuid

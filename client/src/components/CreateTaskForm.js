@@ -1,28 +1,57 @@
 import React, { useState, useEffect } from "react";
 import API from "../api";
 
-function TaskForm({ groupId, onTaskCreated, taskToEdit, onTaskUpdated }) {
+function TaskForm({ groupId, onTaskCreated, taskToEdit, onTaskUpdated, onCancelEdit }) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [status, setStatus] = useState(0); // Default to "Pending"
     const [deadline, setDeadline] = useState("");
 
-    // Populate the form if editing an existing task
     useEffect(() => {
         if (taskToEdit) {
-            setTitle(taskToEdit.title);
-            setDescription(taskToEdit.description);
-            setStatus(taskToEdit.status);
-            setDeadline(taskToEdit.deadline);
+            console.log("Editing task:", taskToEdit); // Debugging
+            setTitle(taskToEdit.title || "");
+            setDescription(taskToEdit.description || "");
+            setStatus(taskToEdit.status || 0);
+            setDeadline(taskToEdit.deadline || "");
+        } else {
+            // Reset the form when no task is being edited
+            setTitle("");
+            setDescription("");
+            setStatus(0);
+            setDeadline("");
         }
     }, [taskToEdit]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
+        // Validation: Check each field and show specific alerts
+        if (!title.trim()) {
+            alert("Task title is required.");
+            return;
+        }
+        if (!description.trim()) {
+            alert("Task description is required.");
+            return;
+        }
+        if (!deadline) {
+            alert("Task deadline is required.");
+            return;
+        }
+
+        // Validation: Ensure deadline is not earlier than the current year
+        const currentYear = new Date().getFullYear();
+        const selectedYear = new Date(deadline).getFullYear();
+
+        if (selectedYear < currentYear) {
+            alert("Task deadline cannot be earlier than this year.");
+            return;
+        }
+
         const taskData = {
-            title,
-            description,
+            title: title.trim(),
+            description: description.trim(),
             status,
             deadline,
             created_at: new Date().toISOString(),
@@ -31,13 +60,9 @@ function TaskForm({ groupId, onTaskCreated, taskToEdit, onTaskUpdated }) {
 
         if (taskToEdit) {
             // Update an existing task
-            API.put(`/groups/${groupId}/tasks/${taskToEdit.unique_task}/`, taskData)
+            API.put(`/groups/${groupId}/tasks/${taskToEdit}/`, taskData)
                 .then((response) => {
                     onTaskUpdated(response.data);
-                    setTitle("");
-                    setDescription("");
-                    setStatus(0);
-                    setDeadline("");
                 })
                 .catch((error) => console.error("Error updating task:", error));
         } else {
@@ -45,11 +70,6 @@ function TaskForm({ groupId, onTaskCreated, taskToEdit, onTaskUpdated }) {
             API.post(`/groups/${groupId}/tasks/`, taskData)
                 .then((response) => {
                     onTaskCreated(response.data);
-                    setTitle("");
-                    setDescription("");
-                    setStatus(0);
-                    setDeadline("");
-                    
                 })
                 .catch((error) => console.error("Error creating task:", error));
         }
@@ -78,6 +98,11 @@ function TaskForm({ groupId, onTaskCreated, taskToEdit, onTaskUpdated }) {
                 onChange={(e) => setDeadline(e.target.value)}
             />
             <button type="submit">{taskToEdit ? "Update Task" : "Create Task"}</button>
+            {taskToEdit && (
+                <button type="button" onClick={onCancelEdit}>
+                    Cancel Edit
+                </button>
+            )}
         </form>
     );
 }

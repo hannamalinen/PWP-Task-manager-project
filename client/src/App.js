@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import GroupsPanel from "./components/GroupsPanel";
 import TasksPanel from "./components/TasksPanel";
 import CreateTaskForm from "./components/CreateTaskForm";
+import UsersPanel from "./components/UsersPanel";
 import './App.css';
 
 function App() {
@@ -18,9 +19,10 @@ function App() {
         console.log("Task updated:", updatedTask);
         setTasks((prevTasks) =>
             prevTasks.map((task) =>
-                task.id === updatedTask.id ? updatedTask : task
+                task.unique_task === updatedTask.unique_task ? updatedTask : task
             )
-        ); // Update the task in the list
+        );
+        setTaskToEdit(null); // Reset taskToEdit after updating
     };
 
     return (
@@ -35,11 +37,13 @@ function App() {
                             tasks={tasks}
                             onEditTask={(task) => setTaskToEdit(task)}
                         />
+                        <UsersPanel groupId={selectedGroup} />
                         <CreateTaskForm
                             groupId={selectedGroup}
                             taskToEdit={taskToEdit}
                             onTaskCreated={handleTaskCreated}
                             onTaskUpdated={handleTaskUpdated}
+                            onCancelEdit={() => setTaskToEdit(null)}
                         />
                     </>
                 )}
