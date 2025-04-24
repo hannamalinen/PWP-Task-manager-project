@@ -5,6 +5,9 @@ from flask import request
 from flask_restful import Resource
 from task_manager.models import Task, Group, UserGroup
 from task_manager import db
+import requests
+
+from email_service.notify import send_email_notification
 
 class GroupTaskCollection(Resource):
     """Resource class for get method for GroupTaskCollection"""
@@ -130,6 +133,21 @@ class GroupTaskItem(Resource):
         if "status" in data:
             if not isinstance(data["status"], int):
                 return {"error": "Status must be an integer"}, 400
+            # Send email notification if status is changed to 1 (completed)
+            if task.status != data["status"] and data["status"] == 1:
+                email_data = {
+                    "sender": "vaaraniemi02@gmail.com",
+                    "recipient": "pvaarani21@student.oulu.fi",
+                    "subject": f"Task '{task.title}' is completed!",
+                    "body": f"The task '{task.title}' in group {group_id} has been marked as done."
+                }
+                try:
+                    response = requests.post("http://127.0.0.1:8000/api/emails/", json=email_data)
+                    if response.status_code != 200:
+                        return {"error": f"Failed to send email: {response.json()}"}, response.status_code
+                except requests.exceptions.RequestException as e:
+                    return {"error": f"Failed to connect to email service: {str(e)}"}, 500
+                    
             task.status = data["status"]
         if "deadline" in data:
             try:

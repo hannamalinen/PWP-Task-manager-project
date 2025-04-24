@@ -42,4 +42,4 @@ class EmailCollection(Resource):
             email.status = "failed"
             email.error_message = str(e)
         
-        return email.serialize(), 201
+        return {"message": "Email sent successfully"}, 200

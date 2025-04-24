@@ -1,8 +1,7 @@
 import hashlib
 import click
 from flask.cli import with_appcontext
-from task_manager import db
-from task_manager.utils import RespondBody
+from email_service import db
 
 class Email(db.Model):
     "Email database model"
