@@ -106,7 +106,7 @@ class GroupCollection(Resource):
 
 class UserToGroup(Resource):
     "Resource class for post method for UserToGroup"
-    # adding user to group
+
     def get(self, group_id):
         """Get all members of a group by group ID."""
         group = db.session.get(Group, group_id)
@@ -135,7 +135,8 @@ class UserToGroup(Resource):
         if not group:
             return {"error": "Group not found"}, 404
 
-        user = User.query.filter_by(unique_user=user_id).first()
+        #user = User.query.filter_by(unique_user=user_id).first()
+        user = db.session.get(User, user_id)
         if not user:
             # debug information - copilot created this line while helping us debug
             print(f"User not found: {user_id}")
