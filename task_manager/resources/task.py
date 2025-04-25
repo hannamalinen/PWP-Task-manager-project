@@ -1,4 +1,5 @@
 """This module contains the resources for the Task model."""
+import os
 import uuid
 from datetime import datetime
 from flask import request
@@ -6,8 +7,6 @@ from flask_restful import Resource
 from task_manager.models import Task, Group, UserGroup
 from task_manager import db
 import requests
-
-from email_service.notify import send_email_notification
 
 class GroupTaskCollection(Resource):
     """Resource class for get method for GroupTaskCollection"""
@@ -22,6 +21,7 @@ class GroupTaskCollection(Resource):
         tasks = Task.query.filter(Task.usergroup_id.in_(usergroup_ids)).all()
         return [{
             "id": task.id,
+            "unique_task": task.unique_task,
             "title": task.title,
             "description": task.description,
             "status": task.status,
@@ -136,7 +136,7 @@ class GroupTaskItem(Resource):
             # Send email notification if status is changed to 1 (completed)
             if task.status != data["status"] and data["status"] == 1:
                 email_data = {
-                    "sender": "vaaraniemi02@gmail.com",
+                    "sender": os.getenv("EMAIL_ADDRESS"),
                     "recipient": "pvaarani21@student.oulu.fi",
                     "subject": f"Task '{task.title}' is completed!",
                     "body": f"The task '{task.title}' in group {group_id} has been marked as done."
@@ -152,6 +152,26 @@ class GroupTaskItem(Resource):
         if "deadline" in data:
             try:
                 task.deadline = datetime.fromisoformat(data["deadline"])
+
+                now = datetime.now()
+                days_until_deadline = (task.deadline - now).days
+                
+                if 0 <= days_until_deadline <= 3:
+                    email_data = {
+                        "sender": os.getenv("EMAIL_ADDRESS"),
+                        "recipient": "pvaarani21@student.oulu.fi",
+                        "subject": f"Reminder: Deadline for '{task.title}' is due in 3 days",
+                        "body": (
+                            f"This is a reminder that the task '{task.title}' has a deadline on {task.deadline.date()}.\n"
+                            f"Only {days_until_deadline} days left!"
+                        )
+                    }
+                    try:
+                        response = requests.post("http://127.0.0.1:8000/api/emails/", json=email_data)
+                        if response.status_code != 200:
+                            print(f"Deadline reminder failed: {response.json()}")
+                    except requests.exceptions.RequestException as e:
+                        print(f"Error contacting email service: {str(e)}")
             except ValueError:
                 return {"error": "Invalid deadline format. Use ISO format (YYYY-MM-DDTHH:MM:SS)"}, 400
 

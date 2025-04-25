@@ -5,6 +5,10 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_caching import Cache
 from flask_cors import CORS  # Import CORS
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # from Lovelace ->
 # https://lovelace.oulu.fi/ohjelmoitava-web/ohjelmoitava-web/flask-api-project-layout/
 # and github ->
