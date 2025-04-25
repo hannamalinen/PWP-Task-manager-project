@@ -12,7 +12,7 @@ function UsersPanel({ groupId }) {
     useEffect(() => {
         if (groupId) {
             // Fetch users in the group
-            API.get(`/groups/${groupId}/users/`)
+            API.get(`/groups/${groupId}/members/`)
                 .then((response) => {
                     console.log("Users in group fetched:", response.data);
                     setUsers(response.data);
@@ -69,10 +69,8 @@ function UsersPanel({ groupId }) {
             return;
         }
 
-        const role = "member"; // Default role for the user (you can make this dynamic if needed)
-        const payload = { user_id: selectedUserId, role }; // Match the backend's expected fields
-
-        console.log("Payload for assigning user to group:", payload); // Debugging
+        const role = "member"; // Default role for the user
+        const payload = { user_id: selectedUserId, role };
 
         API.post(`/groups/${groupId}/user/`, payload)
             .then((response) => {
@@ -87,7 +85,7 @@ function UsersPanel({ groupId }) {
     };
 
     const handleRemoveUserFromGroup = (userId) => {
-        API.delete(`/groups/${groupId}/users/${userId}/`)
+        API.delete(`/group/${groupId}/user/`, { data: { user_id: userId } })
             .then(() => {
                 console.log(`User with ID ${userId} removed from group.`);
                 setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId)); // Remove the user from the group

@@ -135,20 +135,16 @@ class UserToGroup(Resource):
         if not group:
             return {"error": "Group not found"}, 404
 
-        #user = User.query.filter_by(unique_user=user_id).first()
         user = db.session.get(User, user_id)
         if not user:
-            # debug information - copilot created this line while helping us debug
-            print(f"User not found: {user_id}")
             return {"error": "User not found"}, 404
 
-        # debug information - copilot created this line while helping us debug
-        print(f"Adding User ID: {user_id} to Group ID: {group_id}")
-
+        # Check if the user is already in the group
         if UserGroup.query.filter_by(user_id=user.id, group_id=group_id).first():
             return {"error": "User already in group"}, 400
 
-        user_group = UserGroup(user_id=user_id, group_id=group_id, role=role)
+        # Add the user to the group
+        user_group = UserGroup(user_id=user.id, group_id=group_id, role=role)
         db.session.add(user_group)
         db.session.commit()
 
@@ -207,3 +203,26 @@ class UserToGroup(Resource):
         db.session.commit()
 
         return {"message": "User role updated successfully"}, 200
+
+class GroupMembers(Resource):
+    def get(self, group_id):
+        """Get all members of a group by group ID."""
+        group = db.session.get(Group, group_id)
+        if not group:
+            return {"error": "Group not found"}, 404
+
+        # Fetch all users in the group
+        user_groups = UserGroup.query.filter_by(group_id=group_id).all()
+        if not user_groups:
+            return {"error": "No users found in this group"}, 404
+
+        users = [
+            {
+                "id": user_group.user.id,
+                "name": user_group.user.name,
+                "email": user_group.user.email,
+                "role": user_group.role
+            }
+            for user_group in user_groups
+        ]
+        return users, 200

@@ -3,7 +3,6 @@ import hashlib
 import click
 from flask.cli import with_appcontext
 from task_manager import db
-from task_manager.utils import RespondBody
 
 # from github
 # https://github.com/enkwolf/pwp-course-sensorhub-api-example/blob/master/sensorhub/models.py

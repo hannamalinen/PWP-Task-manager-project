@@ -4,7 +4,7 @@ from flask_restful import Api
 
 from task_manager.resources.task import GroupTaskCollection, GroupTaskItem
 from task_manager.resources.user import UserCollection, UserItem
-from task_manager.resources.group import GroupItem, GroupCollection, UserToGroup
+from task_manager.resources.group import GroupItem, GroupCollection, UserToGroup, GroupMembers
 
 api_bp = Blueprint("api", __name__, url_prefix="/api")
 api = Api(api_bp)
@@ -17,3 +17,4 @@ api.add_resource(GroupItem, "/groups/<int:group_id>/")
 api.add_resource(UserToGroup, "/groups/<int:group_id>/user/")
 api.add_resource(GroupTaskCollection, "/groups/<int:group_id>/tasks/")
 api.add_resource(GroupTaskItem, "/groups/<int:group_id>/tasks/<string:unique_task>/")
+api.add_resource(GroupMembers, "/groups/<int:group_id>/members/")
