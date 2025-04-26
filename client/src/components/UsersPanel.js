@@ -85,10 +85,13 @@ function UsersPanel({ groupId }) {
     };
 
     const handleRemoveUserFromGroup = (userId) => {
-        API.delete(`/group/${groupId}/user/`, { data: { user_id: userId } })
+        API.delete(`/groups/${groupId}/user/`, {
+            headers: { "Content-Type": "application/json" }, // Ensure the content type is JSON
+            data: { user_id: userId }, // Pass the user ID in the request body
+        })
             .then(() => {
                 console.log(`User with ID ${userId} removed from group.`);
-                setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId)); // Remove the user from the group
+                setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId)); // Update the UI
             })
             .catch((error) => console.error("Error removing user from group:", error));
     };
