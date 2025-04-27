@@ -1,5 +1,6 @@
 """This module contains the resources classes for the Email model."""
 
+import os
 from flask import request
 from flask_restful import Resource
 from email_service.models import Email
@@ -27,11 +28,19 @@ class EmailCollection(Resource):
         if not request.is_json:
             return {"error": "Request content type must be JSON"}, 415
         data = request.get_json()
-        if "sender" not in data or "recipient" not in data or "subject" not in data or "body" not in data:
+        if "recipient" not in data or "subject" not in data or "body" not in data:
             return {"error": "Missing required fields"}, 400
         
-        email = Email()
-        email.deserialize(data)
+        sender = os.getenv("EMAIL_ADDRESS")
+        if not sender:
+            return {"error": "Sender email missing"}, 400
+        
+        email = Email(
+            sender=sender,
+            recipient=data["recipient"],
+            subject=data["subject"],
+            body=data["body"]
+        )
         db.session.add(email)
         db.session.commit()
 
