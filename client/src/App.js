@@ -29,22 +29,30 @@ function App() {
         <div className="App">
             <h1>Project Management Dashboard</h1>
             <div className="content">
-                <GroupsPanel onGroupSelect={setSelectedGroup} />
+                <div className="panel">
+                    <GroupsPanel onGroupSelect={setSelectedGroup} />
+                </div>
                 {selectedGroup && (
                     <>
-                        <TasksPanel
-                            groupId={selectedGroup}
-                            tasks={tasks}
-                            onEditTask={(task) => setTaskToEdit(task)}
-                        />
-                        <UsersPanel groupId={selectedGroup} />
-                        <CreateTaskForm
-                            groupId={selectedGroup}
-                            taskToEdit={taskToEdit}
-                            onTaskCreated={handleTaskCreated}
-                            onTaskUpdated={handleTaskUpdated}
-                            onCancelEdit={() => setTaskToEdit(null)}
-                        />
+                        <div className="panel">
+                            <TasksPanel
+                                groupId={selectedGroup}
+                                tasks={tasks}
+                                onEditTask={(task) => setTaskToEdit(task)}
+                            />
+                        </div>
+                        <div className="panel">
+                            <UsersPanel groupId={selectedGroup} />
+                        </div>
+                        <div className="panel">
+                            <CreateTaskForm
+                                groupId={selectedGroup}
+                                taskToEdit={taskToEdit}
+                                onTaskCreated={handleTaskCreated}
+                                onTaskUpdated={handleTaskUpdated}
+                                onCancelEdit={() => setTaskToEdit(null)}
+                            />
+                        </div>
                     </>
                 )}
             </div>
