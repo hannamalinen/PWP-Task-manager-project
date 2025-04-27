@@ -195,9 +195,10 @@ li {
 }
 
 .create-task-form h3 {
-  color: #e91e63; /* Bright pink for the title */
-  margin-bottom: 20px;
-  font-size: 1.5rem;
+  color: #ad1457; /* Dark pink, matching other titles */
+  font-size: 1.8rem; /* Match the font size of other titles */
+  margin-top: 10px; /* Add consistent spacing */
+  text-align: center; /* Center-align the title */
 }
 
 .form-group {
@@ -237,16 +238,22 @@ input[type="datetime-local"] {
 
 .task-frame {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column; /* Stack details and buttons vertically */
+  align-items: flex-start; /* Align content to the left */
   background-color: #f8bbd0; /* Light pink background */
   border: 1px solid #e91e63; /* Bright pink border */
   border-radius: 8px;
-  padding: 10px;
+  padding: 15px;
 }
 
 .task-details {
   flex: 1;
+  line-height: 1.6; /* Add spacing between lines for better readability */
+  margin-bottom: 10px; /* Add spacing between details and buttons */
+}
+
+.task-details strong {
+  color: #ad1457; /* Dark pink for labels */
 }
 
 .task-actions {
@@ -270,4 +277,116 @@ input[type="datetime-local"] {
 
 .delete-button:hover {
   background-color: #d32f2f; /* Red for delete hover effect */
+}
+
+.user-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.user-item {
+  margin-bottom: 10px;
+}
+
+.user-frame {
+  display: flex;
+  flex-direction: column; /* Stack details and actions vertically */
+  align-items: flex-start; /* Align content to the left */
+  background-color: #f8bbd0; /* Light pink background */
+  border: 1px solid #e91e63; /* Bright pink border */
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.user-details {
+  flex: 1;
+  line-height: 1.6; /* Add spacing between lines for better readability */
+  margin-bottom: 10px; /* Add spacing between details and buttons */
+}
+
+.user-details strong {
+  color: #ad1457; /* Dark pink for labels */
+}
+
+.user-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.remove-button {
+  background-color: #e91e63; /* Bright pink */
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.remove-button:hover {
+  background-color: #d32f2f; /* Red for hover effect */
+}
+
+.add-user {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.add-user h3 {
+  color: #e91e63; /* Bright pink */
+  margin-bottom: 10px;
+}
+
+.add-user select {
+  width: 80%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #f8bbd0; /* Light pink border */
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.add-user button {
+  background-color: #e91e63; /* Bright pink */
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 15px;
+  cursor: pointer;
+}
+
+.add-user button:hover {
+  background-color: #ad1457; /* Darker pink for hover effect */
+}
+
+.create-user {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.create-user h3 {
+  color: #e91e63; /* Bright pink */
+  margin-bottom: 10px;
+}
+
+.create-user input {
+  width: 80%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #f8bbd0; /* Light pink border */
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.create-user button {
+  background-color: #e91e63; /* Bright pink */
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 15px;
+  cursor: pointer;
+}
+
+.create-user button:hover {
+  background-color: #ad1457; /* Darker pink for hover effect */
 }

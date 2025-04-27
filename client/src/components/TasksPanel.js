@@ -34,6 +34,8 @@ function TasksPanel({ groupId, onEditTask }) {
                                 <strong>Description:</strong> {task.description} <br />
                                 <strong>Status:</strong> {task.status === 1 ? "Completed" : "Pending"} <br />
                                 <strong>Deadline:</strong> {new Date(task.deadline).toLocaleString()} <br />
+                                <strong>Created At:</strong> {new Date(task.created_at).toLocaleString()} <br />
+                                <strong>Last Modified:</strong> {new Date(task.updated_at).toLocaleString()} <br />
                             </div>
                             <div className="task-actions">
                                 <button className="edit-button" onClick={() => onEditTask(task)}>

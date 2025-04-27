@@ -87,7 +87,7 @@ function CreateTaskForm({ groupId, taskToEdit, onTaskCreated, onTaskUpdated, onC
 
     return (
         <div className="create-task-form">
-            <h3>Create Task</h3> {/* Add title */}
+            <h3>Create/Edit Task</h3> {/* Add title */}
             <form onSubmit={handleSubmit}>
                 <div className="form-group">
                     <label>Task Title</label>
