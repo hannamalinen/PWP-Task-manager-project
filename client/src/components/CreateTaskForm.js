@@ -23,6 +23,13 @@ function TaskForm({ groupId, onTaskCreated, taskToEdit, onTaskUpdated, onCancelE
         }
     }, [taskToEdit]);
 
+    const getLocalISOString = () => {
+        const now = new Date();
+        const offset = now.getTimezoneOffset() * 60000; // Offset in milliseconds
+        const localTime = new Date(now.getTime() - offset);
+        return localTime.toISOString().slice(0, 19); // Remove milliseconds and 'Z'
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
 
@@ -54,8 +61,8 @@ function TaskForm({ groupId, onTaskCreated, taskToEdit, onTaskUpdated, onCancelE
             description: description.trim(),
             status,
             deadline,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
+            created_at: getLocalISOString(), // Use local time
+            updated_at: getLocalISOString(), // Use local time
         };
 
         if (taskToEdit) {
