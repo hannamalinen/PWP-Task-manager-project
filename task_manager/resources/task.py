@@ -1,4 +1,5 @@
 """This module contains the resources for the Task model."""
+import os
 import uuid
 from datetime import datetime
 from flask import request
@@ -6,8 +7,6 @@ from flask_restful import Resource
 from task_manager.models import Task, Group, UserGroup
 from task_manager import db
 import requests
-
-from email_service.notify import send_email_notification
 
 class GroupTaskCollection(Resource):
     """Resource class for get method for GroupTaskCollection"""
@@ -139,7 +138,6 @@ class GroupTaskItem(Resource):
             # Send email notification if status is changed to 1 (completed)
             if task.status != data["status"] and data["status"] == 1:
                 email_data = {
-                    "sender": "vaaraniemi02@gmail.com",
                     "recipient": "pvaarani21@student.oulu.fi",
                     "subject": f"Task '{task.title}' is completed!",
                     "body": f"The task '{task.title}' in group {group_id} has been marked as done."
@@ -155,6 +153,32 @@ class GroupTaskItem(Resource):
         if "deadline" in data:
             try:
                 task.deadline = datetime.fromisoformat(data["deadline"])
+
+                now = datetime.now()
+                deadline_date = task.deadline.date()
+                now_date = now.date()
+
+                days_until_deadline = (deadline_date - now_date).days
+
+                if 0 <= days_until_deadline <= 3:
+                    email_data = {
+                        "recipient": "pvaarani21@student.oulu.fi",
+                        "subject": f"Reminder: Deadline for '{task.title}' is due in {days_until_deadline} day(s)",
+                        "body": (
+                            f"Hello,\n\n"
+                            f"This is a reminder that the task '{task.title}' has a deadline on "
+                            f"{task.deadline.strftime('%Y-%m-%d at %H:%M')}.\n"
+                            f"You have {days_until_deadline} day(s) left to complete it.\n\n"
+                            f"Best regards,\n"
+                            f"Task Manager App"
+                        )
+                    }
+                    try:
+                        response = requests.post("http://127.0.0.1:8000/api/emails/", json=email_data)
+                        if response.status_code != 200:
+                            print(f"Deadline reminder failed: {response.json()}")
+                    except requests.exceptions.RequestException as e:
+                        print(f"Error contacting email service: {str(e)}")
             except ValueError:
                 return {"error": "Invalid deadline format. Use ISO format (YYYY-MM-DDTHH:MM:SS)"}, 400
 
