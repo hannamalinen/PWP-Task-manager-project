@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import API from "../api";
 
-function TasksPanel({ groupId, onEditTask, onDeleteTask }) {
+function TasksPanel({ groupId, onEditTask }) {
     const [tasks, setTasks] = useState([]); // Initialize as an empty array
 
     useEffect(() => {
@@ -28,6 +28,11 @@ function TasksPanel({ groupId, onEditTask, onDeleteTask }) {
             });
     };
 
+    const handleEdit = (task) => {
+        console.log("Editing task:", task); // Debugging
+        onEditTask(task); // Pass the task to the parent component for editing
+    };
+
     return (
         <div className="tasks-panel">
             <h2>Tasks</h2>
@@ -41,7 +46,7 @@ function TasksPanel({ groupId, onEditTask, onDeleteTask }) {
                             <strong>Deadline:</strong> {new Date(task.deadline).toLocaleString()} <br />
                             <strong>Created At:</strong> {new Date(task.created_at).toLocaleString()} <br />
                             <strong>Updated At:</strong> {new Date(task.updated_at).toLocaleString()} <br />
-                            <button onClick={() => onEditTask(task.unique_task)}>Edit</button>
+                            <button onClick={() => handleEdit(task)}>Edit</button>
                             <button onClick={() => handleDelete(task.unique_task)}>Delete</button>
                         </li>
                     ))
