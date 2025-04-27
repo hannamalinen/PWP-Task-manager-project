@@ -30,7 +30,7 @@ function TasksPanel({ groupId, onEditTask }) {
                     <li key={task.id} className="task-item">
                         <div className="task-frame">
                             <div className="task-details">
-                                <strong>Title:</strong> {task.title} <br />
+                                <strong>Title:</strong> <strong>{task.title}</strong> <br />
                                 <strong>Description:</strong> {task.description} <br />
                                 <strong>Status:</strong> {task.status === 1 ? "Completed" : "Pending"} <br />
                                 <strong>Deadline:</strong> {new Date(task.deadline).toLocaleString()} <br />
