@@ -23,7 +23,3 @@ def send_email_notification(to, subject, body):
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
         smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
         smtp.send_message(msg)
-
-#testi
-#send_email_notification("pvaarani21@student.oulu.fi", "Test Subject", "Test Body")
-#print("Email sent successfully!")
