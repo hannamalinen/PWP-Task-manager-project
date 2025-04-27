@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import API from "../api";
 
-function TaskForm({ groupId, onTaskCreated, taskToEdit, onTaskUpdated, onCancelEdit }) {
-    const [title, setTitle] = useState("");
-    const [description, setDescription] = useState("");
+function CreateTaskForm({ groupId, taskToEdit, onTaskCreated, onTaskUpdated, onCancelEdit }) {
+    const [title, setTitle] = useState(taskToEdit ? taskToEdit.title : "");
+    const [description, setDescription] = useState(taskToEdit ? taskToEdit.description : "");
     const [status, setStatus] = useState(0); // Default to "Pending"
     const [deadline, setDeadline] = useState("");
 
@@ -80,39 +80,47 @@ function TaskForm({ groupId, onTaskCreated, taskToEdit, onTaskUpdated, onCancelE
                 })
                 .catch((error) => console.error("Error creating task:", error));
         }
+
+        setTitle("");
+        setDescription("");
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            <input
-                type="text"
-                placeholder="Task Title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-            />
-            <textarea
-                placeholder="Task Description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-            />
-            <select value={status} onChange={(e) => setStatus(Number(e.target.value))}>
-                <option value={0}>Pending</option>
-                <option value={1}>Completed</option>
-            </select>
-            <input
-                type="datetime-local"
-                value={deadline}
-                onChange={(e) => setDeadline(e.target.value)}
-                min={new Date().toISOString().slice(0, 16)} // Prevent selecting past dates
-            />
-            <button type="submit">{taskToEdit ? "Update Task" : "Create Task"}</button>
-            {taskToEdit && (
-                <button type="button" onClick={onCancelEdit}>
-                    Cancel Edit
-                </button>
-            )}
-        </form>
+        <div className="create-task-form">
+            <h3>Create Task</h3> {/* Add title */}
+            <form onSubmit={handleSubmit}>
+                <div className="form-group">
+                    <label>Task Title</label>
+                    <input
+                        type="text"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        placeholder="Enter task title"
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Task Description</label>
+                    <textarea
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="Enter task description"
+                    />
+                </div>
+                <select value={status} onChange={(e) => setStatus(Number(e.target.value))}>
+                    <option value={0}>Pending</option>
+                    <option value={1}>Completed</option>
+                </select>
+                <input
+                    type="datetime-local"
+                    value={deadline}
+                    onChange={(e) => setDeadline(e.target.value)}
+                    min={new Date().toISOString().slice(0, 16)} // Prevent selecting past dates
+                />
+                <button type="submit">{taskToEdit ? "Update Task" : "Create Task"}</button>
+                {taskToEdit && <button onClick={onCancelEdit}>Cancel</button>}
+            </form>
+        </div>
     );
 }
 
-export default TaskForm;
+export default CreateTaskForm;

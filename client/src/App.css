@@ -51,6 +51,13 @@ h1 {
   margin-bottom: 20px;
 }
 
+h2 {
+  color: #ad1457; /* Dark pink */
+  margin-top: 10px;
+  font-size: 1.8rem;
+  text-align: center;
+}
+
 .content {
   display: flex;
   justify-content: space-around;
@@ -75,17 +82,18 @@ button {
   padding: 10px 15px;
   cursor: pointer;
   font-size: 1rem;
+  margin-right: 10px;
 }
 
 button:hover {
-  background-color: #ad1457; 
+  background-color: #ad1457; /* Darker pink for hover effect */
 }
 
 input, select, textarea {
   width: 100%;
   padding: 10px;
   margin: 10px 0;
-  border: 1px solid #f8bbd0; 
+  border: 1px solid #f8bbd0; /* Light pink border */
   border-radius: 4px;
   font-size: 1rem;
 }
@@ -98,4 +106,168 @@ ul {
 li {
   margin: 10px 0;
   text-align: left;
+}
+
+.groups-panel {
+  text-align: left;
+}
+
+.group-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.group-item {
+  margin-bottom: 10px;
+}
+
+.group-frame {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f8bbd0; /* Light pink background */
+  border: 1px solid #e91e63; /* Bright pink border */
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.group-name {
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.edit-button,
+.delete-button {
+  background-color: #e91e63; /* Bright pink */
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  margin-left: 5px;
+}
+
+.edit-button:hover {
+  background-color: #ad1457; /* Darker pink for hover effect */
+}
+
+.delete-button:hover {
+  background-color: #d32f2f; /* Red for delete hover effect */
+}
+
+.create-group,
+.edit-group {
+  margin-top: 20px;
+}
+
+.create-group input,
+.edit-group input {
+  width: calc(100% - 110px);
+  padding: 8px;
+  margin-right: 10px;
+  border: 1px solid #f8bbd0;
+  border-radius: 4px;
+}
+
+.create-group button,
+.edit-group button {
+  background-color: #e91e63;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 15px;
+  cursor: pointer;
+}
+
+.create-group button:hover,
+.edit-group button:hover {
+  background-color: #ad1457;
+}
+
+.create-task-form {
+  text-align: left;
+  padding: 20px;
+  background-color: #fff;
+  border: 1px solid #f8bbd0; /* Light pink border */
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.create-task-form h3 {
+  color: #e91e63; /* Bright pink for the title */
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 20px; /* Add spacing between form fields */
+}
+
+.form-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group textarea,
+select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #f8bbd0; /* Light pink border */
+  border-radius: 4px;
+  font-size: 1rem;
+  margin-top: 5px; /* Add a small buffer between label and input */
+}
+
+input[type="datetime-local"] {
+  margin-top: 10px; /* Add spacing for the deadline input */
+}
+
+.task-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.task-item {
+  margin-bottom: 10px;
+}
+
+.task-frame {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f8bbd0; /* Light pink background */
+  border: 1px solid #e91e63; /* Bright pink border */
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.task-details {
+  flex: 1;
+}
+
+.task-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.edit-button,
+.delete-button {
+  background-color: #e91e63; /* Bright pink */
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.edit-button:hover {
+  background-color: #ad1457; /* Darker pink for hover effect */
+}
+
+.delete-button:hover {
+  background-color: #d32f2f; /* Red for delete hover effect */
 }

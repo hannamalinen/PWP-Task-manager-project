@@ -7,30 +7,24 @@ import './App.css';
 
 function App() {
     const [selectedGroup, setSelectedGroup] = useState(null);
-    const [tasks, setTasks] = useState([]); // State to manage tasks
+    const [selectedGroupName, setSelectedGroupName] = useState(""); // Store the group's name
+    const [tasks, setTasks] = useState([]);
     const [taskToEdit, setTaskToEdit] = useState(null);
 
-    const handleTaskCreated = (newTask) => {
-        console.log("New task created:", newTask);
-        setTasks((prevTasks) => [...prevTasks, newTask]); // Add the new task to the list
-    };
-
-    const handleTaskUpdated = (updatedTask) => {
-        console.log("Task updated:", updatedTask);
-        setTasks((prevTasks) =>
-            prevTasks.map((task) =>
-                task.unique_task === updatedTask.unique_task ? updatedTask : task
-            )
-        );
-        setTaskToEdit(null); // Reset taskToEdit after updating
+    const handleGroupSelect = (groupId, groupName) => {
+        setSelectedGroup(groupId);
+        setSelectedGroupName(groupName); // Update the group's name
     };
 
     return (
         <div className="App">
             <h1>Project Management Dashboard</h1>
+            {selectedGroup && (
+                <h2>Viewing group: {selectedGroupName}</h2> // Display group name at the top
+            )}
             <div className="content">
                 <div className="panel">
-                    <GroupsPanel onGroupSelect={setSelectedGroup} />
+                    <GroupsPanel onGroupSelect={handleGroupSelect} />
                 </div>
                 {selectedGroup && (
                     <>
@@ -48,8 +42,18 @@ function App() {
                             <CreateTaskForm
                                 groupId={selectedGroup}
                                 taskToEdit={taskToEdit}
-                                onTaskCreated={handleTaskCreated}
-                                onTaskUpdated={handleTaskUpdated}
+                                onTaskCreated={(newTask) =>
+                                    setTasks((prevTasks) => [...prevTasks, newTask])
+                                }
+                                onTaskUpdated={(updatedTask) =>
+                                    setTasks((prevTasks) =>
+                                        prevTasks.map((task) =>
+                                            task.unique_task === updatedTask.unique_task
+                                                ? updatedTask
+                                                : task
+                                        )
+                                    )
+                                }
                                 onCancelEdit={() => setTaskToEdit(null)}
                             />
                         </div>
