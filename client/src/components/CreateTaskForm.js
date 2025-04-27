@@ -40,12 +40,12 @@ function TaskForm({ groupId, onTaskCreated, taskToEdit, onTaskUpdated, onCancelE
             return;
         }
 
-        // Validation: Ensure deadline is not earlier than the current year
-        const currentYear = new Date().getFullYear();
-        const selectedYear = new Date(deadline).getFullYear();
+        // Validation: Ensure deadline is not in the past
+        const currentDate = new Date();
+        const selectedDate = new Date(deadline);
 
-        if (selectedYear < currentYear) {
-            alert("Task deadline cannot be earlier than this year.");
+        if (selectedDate < currentDate) {
+            alert("Task deadline cannot be earlier than the current date.");
             return;
         }
 
@@ -96,6 +96,7 @@ function TaskForm({ groupId, onTaskCreated, taskToEdit, onTaskUpdated, onCancelE
                 type="datetime-local"
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
+                min={new Date().toISOString().slice(0, 16)} // Prevent selecting past dates
             />
             <button type="submit">{taskToEdit ? "Update Task" : "Create Task"}</button>
             {taskToEdit && (
