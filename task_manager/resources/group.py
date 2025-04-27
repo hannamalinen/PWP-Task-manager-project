@@ -3,7 +3,7 @@
 import uuid
 from flask import request
 from flask_restful import Resource
-from task_manager.models import Group, User, UserGroup
+from task_manager.models import Group, User, UserGroup, Task
 from task_manager import db
 
 class GroupItem(Resource):
@@ -51,6 +51,15 @@ class GroupItem(Resource):
         if not group:
             return {"error": "Group not found"}, 404
 
+        # Delete all tasks associated with the group's user groups
+        user_groups = UserGroup.query.filter_by(group_id=group_id).all()
+        for user_group in user_groups:
+            Task.query.filter_by(usergroup_id=user_group.id).delete()
+
+        # Delete the user groups
+        UserGroup.query.filter_by(group_id=group_id).delete()
+
+        # Delete the group
         db.session.delete(group)
         db.session.commit()
         return {"message": "Group deleted successfully"}, 204
