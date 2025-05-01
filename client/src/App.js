@@ -1,66 +1,28 @@
-import React, { useState } from "react";
-import GroupsPanel from "./components/GroupsPanel";
-import TasksPanel from "./components/TasksPanel";
-import CreateTaskForm from "./components/CreateTaskForm";
-import UsersPanel from "./components/UsersPanel";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import MainPage from "./pages/MainPage";
+import ControlPage from "./pages/ControlPage";
+import GroupPage from "./pages/GroupPage";
 import './App.css';
 
 function App() {
-    const [selectedGroup, setSelectedGroup] = useState(null);
-    const [selectedGroupName, setSelectedGroupName] = useState(""); // Store the group's name
-    const [tasks, setTasks] = useState([]);
-    const [taskToEdit, setTaskToEdit] = useState(null);
-
-    const handleGroupSelect = (groupId, groupName) => {
-        setSelectedGroup(groupId);
-        setSelectedGroupName(groupName); // Update the group's name
-    };
-
     return (
-        <div className="App">
-            <h1>Project Management Dashboard</h1>
-            {selectedGroup && (
-                <h2>Viewing group: {selectedGroupName}</h2> // Display group name at the top
-            )}
-            <div className="content">
-                <div className="panel">
-                    <GroupsPanel onGroupSelect={handleGroupSelect} />
-                </div>
-                {selectedGroup && (
-                    <>
-                        <div className="panel">
-                            <TasksPanel
-                                groupId={selectedGroup}
-                                tasks={tasks}
-                                onEditTask={(task) => setTaskToEdit(task)}
-                            />
-                        </div>
-                        <div className="panel">
-                            <UsersPanel groupId={selectedGroup} />
-                        </div>
-                        <div className="panel">
-                            <CreateTaskForm
-                                groupId={selectedGroup}
-                                taskToEdit={taskToEdit}
-                                onTaskCreated={(newTask) =>
-                                    setTasks((prevTasks) => [...prevTasks, newTask])
-                                }
-                                onTaskUpdated={(updatedTask) =>
-                                    setTasks((prevTasks) =>
-                                        prevTasks.map((task) =>
-                                            task.unique_task === updatedTask.unique_task
-                                                ? updatedTask
-                                                : task
-                                        )
-                                    )
-                                }
-                                onCancelEdit={() => setTaskToEdit(null)}
-                            />
-                        </div>
-                    </>
-                )}
+        <Router>
+            <div className="App">
+                <header>
+                    <h1>Task Manager</h1>
+                    <nav>
+                        <Link to="/">Main Page</Link>
+                        <Link to="/control">Control Page</Link>
+                    </nav>
+                </header>
+                <Routes>
+                    <Route path="/" element={<MainPage />} />
+                    <Route path="/control" element={<ControlPage />} />
+                    <Route path="/group/:groupId" element={<GroupPage />} />
+                </Routes>
             </div>
-        </div>
+        </Router>
     );
 }
 

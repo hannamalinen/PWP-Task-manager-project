@@ -1,23 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import API from "../api";
 
-function TasksPanel({ groupId, onEditTask }) {
-    const [tasks, setTasks] = useState([]);
-
-    useEffect(() => {
-        if (groupId) {
-            API.get(`/groups/${groupId}/tasks/`)
-                .then((response) => setTasks(response.data || []))
-                .catch((error) => console.error("Error fetching tasks:", error));
-        }
-    }, [groupId]);
-
+function TasksPanel({ groupId, tasks, onEditTask }) {
     const handleDelete = (uniqueTask) => {
         if (!window.confirm("Are you sure you want to delete this task?")) return;
 
         API.delete(`/groups/${groupId}/tasks/${uniqueTask}/`)
             .then(() => {
-                setTasks((prevTasks) => prevTasks.filter((task) => task.unique_task !== uniqueTask));
+                // Notify parent to update tasks
+                const updatedTasks = tasks.filter((task) => task.unique_task !== uniqueTask);
+                onEditTask(updatedTasks); // Optional: Notify parent if needed
             })
             .catch((error) => console.error("Error deleting task:", error));
     };
@@ -38,7 +30,10 @@ function TasksPanel({ groupId, onEditTask }) {
                                 <strong>Last Modified:</strong> {new Date(task.updated_at).toLocaleString()} <br />
                             </div>
                             <div className="task-actions">
-                                <button className="edit-button" onClick={() => onEditTask(task)}>
+                                <button
+                                    className="edit-button"
+                                    onClick={() => onEditTask(task)} // Call the edit handler
+                                >
                                     Edit
                                 </button>
                                 <button className="delete-button" onClick={() => handleDelete(task.unique_task)}>

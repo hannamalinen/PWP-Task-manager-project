@@ -9,13 +9,11 @@ function CreateTaskForm({ groupId, taskToEdit, onTaskCreated, onTaskUpdated, onC
 
     useEffect(() => {
         if (taskToEdit) {
-            console.log("Editing task:", taskToEdit); // Debugging
             setTitle(taskToEdit.title || "");
             setDescription(taskToEdit.description || "");
             setStatus(taskToEdit.status || 0);
             setDeadline(taskToEdit.deadline || "");
         } else {
-            // Reset the form when no task is being edited
             setTitle("");
             setDescription("");
             setStatus(0);
@@ -33,7 +31,6 @@ function CreateTaskForm({ groupId, taskToEdit, onTaskCreated, onTaskUpdated, onC
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        // Validation: Check each field and show specific alerts
         if (!title.trim()) {
             alert("Task title is required.");
             return;
@@ -47,42 +44,30 @@ function CreateTaskForm({ groupId, taskToEdit, onTaskCreated, onTaskUpdated, onC
             return;
         }
 
-        // Validation: Ensure deadline is not in the past
-        const currentDate = new Date();
-        const selectedDate = new Date(deadline);
-
-        if (selectedDate < currentDate) {
-            alert("Task deadline cannot be earlier than the current date.");
-            return;
-        }
-
         const taskData = {
             title: title.trim(),
             description: description.trim(),
-            status,
+            status, // Include the status field
             deadline,
-            created_at: getLocalISOString(), // Use local time
-            updated_at: getLocalISOString(), // Use local time
+            created_at: taskToEdit ? taskToEdit.created_at : new Date().toISOString(),
+            updated_at: new Date().toISOString(),
         };
 
         if (taskToEdit) {
-            // Update an existing task
-            API.put(`/groups/${groupId}/tasks/${taskToEdit}/`, taskData)
+            // Update existing task
+            API.put(`/groups/${groupId}/tasks/${taskToEdit.unique_task}/`, taskData)
                 .then((response) => {
-                    onTaskUpdated(response.data);
+                    onTaskUpdated(response.data); // Notify parent of the updated task
                 })
                 .catch((error) => console.error("Error updating task:", error));
         } else {
-            // Create a new task
+            // Create new task
             API.post(`/groups/${groupId}/tasks/`, taskData)
                 .then((response) => {
-                    onTaskCreated(response.data);
+                    onTaskCreated(response.data); // Notify parent of the new task
                 })
                 .catch((error) => console.error("Error creating task:", error));
         }
-
-        setTitle("");
-        setDescription("");
     };
 
     return (
