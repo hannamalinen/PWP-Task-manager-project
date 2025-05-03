@@ -1,5 +1,5 @@
 """This module handles sending real email notifications."""
-
+# Copilot helped implementing the email notification functionality.
 import os
 import smtplib
 from email.message import EmailMessage

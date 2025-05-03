@@ -73,6 +73,56 @@ class GroupTaskCollection(Resource):
             )
         db.session.add(task)
         db.session.commit()
+
+        # Copilot helped to implement this part
+        # Send email notification if status is changed to 1 (completed)
+        if status == 1:
+            email_data = {
+                "recipient": "pvaarani21@student.oulu.fi",
+                "subject": f"Task '{title}' is completed!",
+                "body": (
+                    f"Hello,\n\n"
+                    f"The task '{title}' in group {group.name} has been marked as completed.\n\n"
+                    f"Best regards,\n"
+                    f"Task Manager App"
+                )
+            }
+            try:
+                response = requests.post("http://127.0.0.1:8000/api/emails/", json=email_data)
+                if response.status_code != 200:
+                    print(f"Failed to send completion email: {response.json()}")
+            except requests.exceptions.RequestException as e:
+                print(f"Error contacting email service: {str(e)}")
+
+        # Send email notification for deadline reminder
+        try:
+            now = datetime.now()
+            deadline_date = task.deadline.date()
+            now_date = now.date()
+
+            days_until_deadline = (deadline_date - now_date).days
+
+            if 0 <= days_until_deadline <= 3:
+                email_data = {
+                    "recipient": "pvaarani21@student.oulu.fi",
+                    "subject": f"Reminder: Deadline for '{task.title}' is due in {days_until_deadline} day(s)",
+                    "body": (
+                        f"Hello,\n\n"
+                        f"This is a reminder that the task '{task.title}' has a deadline on "
+                        f"{task.deadline.strftime('%Y-%m-%d at %H:%M')}.\n"
+                        f"You have {days_until_deadline} day(s) left to complete it.\n\n"
+                        f"Best regards,\n"
+                        f"Task Manager App"
+                    )
+                }
+                try:
+                    response = requests.post("http://127.0.0.1:8000/api/emails/", json=email_data)
+                    if response.status_code != 200:
+                        print(f"Deadline reminder failed: {response.json()}")
+                except requests.exceptions.RequestException as e:
+                    print(f"Error contacting email service: {str(e)}")
+        except ValueError:
+            return {"error": "Invalid deadline format. Use ISO format (YYYY-MM-DDTHH:MM:SS)"}, 400
         
         print(f"Task created with unique_task: {new_uuid}")
         return {
@@ -106,6 +156,7 @@ class GroupTaskItem(Resource):
             "updated_at": task.updated_at.isoformat(),
             "usergroup_id": task.usergroup_id
         }, 200
+    
     def put(self, group_id, unique_task):
         """Updates a task information of an existing task"""
         if not request.is_json:
@@ -135,12 +186,18 @@ class GroupTaskItem(Resource):
         if "status" in data:
             if not isinstance(data["status"], int):
                 return {"error": "Status must be an integer"}, 400
+            # Copilot helped to implement this part
             # Send email notification if status is changed to 1 (completed)
             if task.status != data["status"] and data["status"] == 1:
                 email_data = {
                     "recipient": "pvaarani21@student.oulu.fi",
                     "subject": f"Task '{task.title}' is completed!",
-                    "body": f"The task '{task.title}' in group {group_id} has been marked as done."
+                    "body": (
+                        f"Hello,\n\n"
+                        f"The task '{task.title}' in group {group.name} has been marked as completed.\n\n"
+                        f"Best regards,\n"
+                        f"Task Manager App"
+                    )
                 }
                 try:
                     response = requests.post("http://127.0.0.1:8000/api/emails/", json=email_data)
@@ -154,6 +211,7 @@ class GroupTaskItem(Resource):
             try:
                 task.deadline = datetime.fromisoformat(data["deadline"])
 
+                # Copilot helped to implement this part
                 now = datetime.now()
                 deadline_date = task.deadline.date()
                 now_date = now.date()
