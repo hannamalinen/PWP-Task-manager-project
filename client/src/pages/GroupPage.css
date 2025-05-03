@@ -1,0 +1,8 @@
+/* filepath: /Users/annavaara/PWP-Task-manager-project/client/src/pages/GroupPage.css */
+.group-title {
+    font-size: 50px !important; /* Force the font size */
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}

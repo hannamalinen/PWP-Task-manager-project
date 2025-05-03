@@ -1,7 +1,11 @@
+// This file creates a form for creating and editing tasks.
+// It includes fields for task title, description, status, and deadline.
+// It also includes validation for required fields and handles the submission of the form.
 import React, { useState, useEffect } from "react";
 import API from "../api";
 
 function CreateTaskForm({ groupId, taskToEdit, onTaskCreated, onTaskUpdated, onCancelEdit }) {
+    // This component is responsible for creating and editing tasks.
     const [title, setTitle] = useState(taskToEdit ? taskToEdit.title : "");
     const [description, setDescription] = useState(taskToEdit ? taskToEdit.description : "");
     const [status, setStatus] = useState(0); // Default to "Pending"
@@ -9,6 +13,7 @@ function CreateTaskForm({ groupId, taskToEdit, onTaskCreated, onTaskUpdated, onC
 
     useEffect(() => {
         if (taskToEdit) {
+            // If editing a task, set the form fields to the task's current values
             setTitle(taskToEdit.title || "");
             setDescription(taskToEdit.description || "");
             setStatus(taskToEdit.status || 0);
@@ -22,6 +27,7 @@ function CreateTaskForm({ groupId, taskToEdit, onTaskCreated, onTaskUpdated, onC
     }, [taskToEdit]);
 
     const getLocalISOString = () => {
+        // This function gets the current local date and time in ISO format.
         const now = new Date();
         const offset = now.getTimezoneOffset() * 60000; // Offset in milliseconds
         const localTime = new Date(now.getTime() - offset);
@@ -29,6 +35,10 @@ function CreateTaskForm({ groupId, taskToEdit, onTaskCreated, onTaskUpdated, onC
     };
 
     const handleSubmit = (e) => {
+        // This function handles the form submission.
+        // It validates the input fields and sends a POST or PUT request to create or update a task.
+        // if the form is valid, it sends the data to the server.
+        // If the form is invalid, it alerts the user.
         e.preventDefault();
 
         if (!title.trim()) {
@@ -72,7 +82,8 @@ function CreateTaskForm({ groupId, taskToEdit, onTaskCreated, onTaskUpdated, onC
 
     return (
         <div className="create-task-form">
-            <h3>Create/Edit Task</h3> {/* Add title */}
+            {/* Dynamically change the header based on the mode */}
+            <h3>{taskToEdit ? "Edit Task" : "Create Task"}</h3>
             <form onSubmit={handleSubmit}>
                 <div className="form-group">
                     <label>Task Title</label>

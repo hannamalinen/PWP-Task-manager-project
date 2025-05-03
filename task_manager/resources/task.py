@@ -197,7 +197,9 @@ class GroupTaskItem(Resource):
         user_group = UserGroup.query.filter_by(group_id=group_id).first()
         if not user_group:
             return {"error": "UserGroup not found for the given group"}, 404
-
+        if not user_group.role == "admin":
+            return {"error": "Only admin can delete tasks"}, 403
+        
         # Find the task associated with the unique_task and usergroup_id
         usergroup_id = user_group.id
         task = Task.query.filter_by(unique_task=unique_task, usergroup_id=usergroup_id).first()

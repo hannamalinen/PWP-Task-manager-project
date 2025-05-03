@@ -4,6 +4,7 @@ import TasksPanel from "../components/TasksPanel";
 import UsersPanel from "../components/UsersPanel";
 import CreateTaskForm from "../components/CreateTaskForm";
 import API from "../api"; // Add this line
+import "./GroupPage.css";
 
 function GroupPage() {
     const { groupId } = useParams();
@@ -31,7 +32,7 @@ function GroupPage() {
 
     return (
         <div>
-            <h2 className="group-title">Group: {groupName}</h2>
+            <h2 className="group-title">{groupName}</h2>
             <div className="group-page">
                 <div className="panel panel-left">
                     <h3>{taskToEdit ? "Edit Task" : "Create Task"}</h3>

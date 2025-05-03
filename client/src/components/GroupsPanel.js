@@ -1,7 +1,11 @@
+// This file handles the group management functionality.
+// it allows users to create, edit, and delete groups.
+// It also allows users to select a group to view its tasks and users.
 import React, { useEffect, useState } from "react";
 import API from "../api";
 
 function GroupsPanel({ onGroupSelect }) {
+    // This component manages the groups in the application. 
     const [groups, setGroups] = useState([]);
     const [newGroupName, setNewGroupName] = useState("");
     const [editingGroupId, setEditingGroupId] = useState(null);
@@ -14,6 +18,9 @@ function GroupsPanel({ onGroupSelect }) {
     }, []);
 
     const handleCreateGroup = () => {
+        // this function handles the creation of a new group.
+        // It checks if the group name is provided. If not, it alerts the user.
+        // If the group name is valid, it sends a POST request to create a new group.
         if (!newGroupName.trim()) {
             alert("Group name is required.");
             return;
@@ -28,6 +35,10 @@ function GroupsPanel({ onGroupSelect }) {
     };
 
     const handleDeleteGroup = (groupId) => {
+        // this function handles the deletion of a group.
+        // It prompts the user for confirmation before sending a DELETE request to remove the group.
+        // If the user confirms, it filters out the deleted group from the state.
+        // If the user cancels, it does nothing.
         if (!window.confirm("Are you sure you want to delete this group?")) return;
 
         API.delete(`/groups/${groupId}/`)
@@ -38,6 +49,9 @@ function GroupsPanel({ onGroupSelect }) {
     };
 
     const handleEditGroup = (groupId, groupName) => {
+        // this function handles the editing of a group.
+        // It sets the editing group ID and name in the state.
+        // This allows the user to edit the group's name.
         setEditingGroupId(groupId);
         setEditingGroupName(groupName);
     };
