@@ -35,10 +35,6 @@ function CreateTaskForm({ groupId, taskToEdit, onTaskCreated, onTaskUpdated, onC
     };
 
     const handleSubmit = (e) => {
-        // This function handles the form submission.
-        // It validates the input fields and sends a POST or PUT request to create or update a task.
-        // if the form is valid, it sends the data to the server.
-        // If the form is invalid, it alerts the user.
         e.preventDefault();
 
         if (!title.trim()) {
@@ -58,25 +54,27 @@ function CreateTaskForm({ groupId, taskToEdit, onTaskCreated, onTaskUpdated, onC
             title: title.trim(),
             description: description.trim(),
             status, // Include the status field
-            deadline,
+            deadline: new Date(deadline).toISOString(), // Convert to full ISO 8601 format
             created_at: taskToEdit ? taskToEdit.created_at : new Date().toISOString(),
             updated_at: new Date().toISOString(),
         };
 
+        console.log("Payload being sent to the backend:", taskData); // Log the payload
+
         if (taskToEdit) {
-            // Update existing task
             API.put(`/groups/${groupId}/tasks/${taskToEdit.unique_task}/`, taskData)
                 .then((response) => {
-                    onTaskUpdated(response.data); // Notify parent of the updated task
+                    onTaskUpdated(response.data);
                 })
-                .catch((error) => console.error("Error updating task:", error));
+                .catch((error) => console.error("Error updating task:", error.response?.data || error.message));
         } else {
-            // Create new task
             API.post(`/groups/${groupId}/tasks/`, taskData)
                 .then((response) => {
-                    onTaskCreated(response.data); // Notify parent of the new task
+                    onTaskCreated(response.data);
                 })
-                .catch((error) => console.error("Error creating task:", error));
+                .catch((error) => {
+                    console.error("Error creating task:", error.response?.data || error.message);
+                });
         }
     };
 

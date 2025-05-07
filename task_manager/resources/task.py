@@ -46,6 +46,15 @@ class GroupTaskCollection(Resource):
         except KeyError:
             return {"error": "Incomplete request - missing information"}, 400
 
+        if not title:
+            return {"error": "Title is required"}, 400
+        if not description:
+            return {"error": "Description is required"}, 400
+        if not isinstance(status, int):
+            return {"error": "Status must be an integer"}, 400
+        if not deadline:
+            return {"error": "Deadline is required"}, 400
+
         group = db.session.get(Group, group_id)
         if not group:
             return {"error": "Group not found"}, 404
@@ -93,6 +102,7 @@ class GroupTaskCollection(Resource):
                     print(f"Failed to send completion email: {response.json()}")
             except requests.exceptions.RequestException as e:
                 print(f"Error contacting email service: {str(e)}")
+                # Log the error but continue with task creation
 
         # Send email notification for deadline reminder
         try:
@@ -188,23 +198,23 @@ class GroupTaskItem(Resource):
                 return {"error": "Status must be an integer"}, 400
             # Copilot helped to implement this part
             # Send email notification if status is changed to 1 (completed)
-            if task.status != data["status"] and data["status"] == 1:
-                email_data = {
-                    "recipient": "pvaarani21@student.oulu.fi",
-                    "subject": f"Task '{task.title}' is completed!",
-                    "body": (
-                        f"Hello,\n\n"
-                        f"The task '{task.title}' in group {group.name} has been marked as completed.\n\n"
-                        f"Best regards,\n"
-                        f"Task Manager App"
-                    )
-                }
-                try:
-                    response = requests.post("http://127.0.0.1:8000/api/emails/", json=email_data)
-                    if response.status_code != 200:
-                        return {"error": f"Failed to send email: {response.json()}"}, response.status_code
-                except requests.exceptions.RequestException as e:
-                    return {"error": f"Failed to connect to email service: {str(e)}"}, 500
+            # if task.status != data["status"] and data["status"] == 1:
+            #     email_data = {
+            #         "recipient": "pvaarani21@student.oulu.fi",
+            #         "subject": f"Task '{task.title}' is completed!",
+            #         "body": (
+            #             f"Hello,\n\n"
+            #             f"The task '{task.title}' in group {group.name} has been marked as completed.\n\n"
+            #             f"Best regards,\n"
+            #             f"Task Manager App"
+            #         )
+            #     }
+            #     try:
+            #         response = requests.post("http://127.0.0.1:8000/api/emails/", json=email_data)
+            #         if response.status_code != 200:
+            #             return {"error": f"Failed to send email: {response.json()}"}, response.status_code
+            #     except requests.exceptions.RequestException as e:
+            #         return {"error": f"Failed to connect to email service: {str(e)}"}, 500
                     
             task.status = data["status"]
         if "deadline" in data:

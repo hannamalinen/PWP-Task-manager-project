@@ -23,6 +23,10 @@ function GroupPage() {
     }, [groupId]);
 
     const handleEditTask = (task) => setTaskToEdit(task);
+    const handleTaskCreated = (newTask) => {
+        console.log("Task created:", newTask); // Log the new task for debugging
+        setTasks((prevTasks) => [...prevTasks, newTask]); // Add the new task to the tasks list
+    };
     const handleTaskUpdated = (updatedTask) => {
         setTasks((prevTasks) =>
             prevTasks.map((task) => (task.id === updatedTask.id ? updatedTask : task))
@@ -39,12 +43,12 @@ function GroupPage() {
                     <CreateTaskForm
                         groupId={groupId}
                         taskToEdit={taskToEdit}
+                        onTaskCreated={handleTaskCreated}
                         onTaskUpdated={handleTaskUpdated}
                         onCancelEdit={handleCancelEdit}
                     />
                 </div>
                 <div className="panel panel-middle">
-                    <h3>Tasks</h3>
                     <TasksPanel
                         groupId={groupId}
                         tasks={tasks}
@@ -52,7 +56,6 @@ function GroupPage() {
                     />
                 </div>
                 <div className="panel panel-right">
-                    <h3>Members</h3>
                     <UsersPanel groupId={groupId} />
                 </div>
             </div>
