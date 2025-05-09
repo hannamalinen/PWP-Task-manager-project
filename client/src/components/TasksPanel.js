@@ -13,6 +13,9 @@ function TasksPanel({ groupId }) {
     const [pendingCount, setPendingCount] = useState(0);
     const [selectedTask, setSelectedTask] = useState(null); // Track the selected task for details
     const [isEditing, setIsEditing] = useState(false); // Track if the task is being edited
+    const [title, setTitle] = useState(""); // Track new task title
+    const [description, setDescription] = useState(""); // Track new task description
+    const [deadline, setDeadline] = useState(""); // Track new task deadline
 
     useEffect(() => {
         if (groupId) {
@@ -43,7 +46,7 @@ function TasksPanel({ groupId }) {
 
     const handleToggleStatus = (task) => {
         const updatedTask = { ...task, status: task.status === 1 ? 0 : 1 }; // Toggle status
-        API.put(`/tasks/${task.unique_task}/`, updatedTask)
+        API.put(`/groups/${groupId}/tasks/${task.unique_task}/`, updatedTask)
             .then((response) => {
                 setTasks((prevTasks) =>
                     prevTasks.map((t) =>
@@ -61,7 +64,7 @@ function TasksPanel({ groupId }) {
     };
 
     const handleSaveTask = () => {
-        API.put(`/tasks/${selectedTask.unique_task}/`, selectedTask)
+        API.put(`/groups/${groupId}/tasks/${selectedTask.unique_task}/`, selectedTask)
             .then((response) => {
                 setTasks((prevTasks) =>
                     prevTasks.map((task) =>
@@ -76,7 +79,7 @@ function TasksPanel({ groupId }) {
     };
 
     const handleDelete = (taskId) => {
-        API.delete(`/tasks/${taskId}/`)
+        API.delete(`/groups/${groupId}/tasks/${taskId}/`)
             .then(() => {
                 setTasks((prevTasks) =>
                     prevTasks.filter((task) => task.unique_task !== taskId)

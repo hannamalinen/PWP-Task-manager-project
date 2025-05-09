@@ -26,9 +26,9 @@ function CreateTaskForm({ groupId, taskToEdit, onTaskCreated, onTaskUpdated, onC
         }
     }, [taskToEdit]);
 
-    const getLocalISOString = () => {
-        // This function gets the current local date and time in ISO format.
-        const now = new Date();
+    const getLocalISOString = (date) => {
+        // This function gets the local date and time in ISO format without the 'Z' suffix.
+        const now = date ? new Date(date) : new Date();
         const offset = now.getTimezoneOffset() * 60000; // Offset in milliseconds
         const localTime = new Date(now.getTime() - offset);
         return localTime.toISOString().slice(0, 19); // Remove milliseconds and 'Z'
@@ -41,41 +41,40 @@ function CreateTaskForm({ groupId, taskToEdit, onTaskCreated, onTaskUpdated, onC
             alert("Task title is required.");
             return;
         }
+
         if (!description.trim()) {
             alert("Task description is required.");
             return;
         }
+
         if (!deadline) {
             alert("Task deadline is required.");
             return;
         }
 
-        const taskData = {
-            title: title.trim(),
-            description: description.trim(),
-            status, // Include the status field
-            deadline: new Date(deadline).toISOString(), // Convert to full ISO 8601 format
-            created_at: taskToEdit ? taskToEdit.created_at : new Date().toISOString(),
-            updated_at: new Date().toISOString(),
+        // Format the deadline and timestamps using getLocalISOString
+        const formattedDeadline = getLocalISOString(deadline);
+        const formattedCreatedAt = getLocalISOString(); // Current time
+        const formattedUpdatedAt = getLocalISOString(); // Current time
+
+        const payload = {
+            title,
+            description,
+            status: 0, // Default status for a new task
+            deadline: formattedDeadline,
+            created_at: formattedCreatedAt,
+            updated_at: formattedUpdatedAt,
         };
 
-        console.log("Payload being sent to the backend:", taskData); // Log the payload
-
-        if (taskToEdit) {
-            API.put(`/groups/${groupId}/tasks/${taskToEdit.unique_task}/`, taskData)
-                .then((response) => {
-                    onTaskUpdated(response.data);
-                })
-                .catch((error) => console.error("Error updating task:", error.response?.data || error.message));
-        } else {
-            API.post(`/groups/${groupId}/tasks/`, taskData)
-                .then((response) => {
-                    onTaskCreated(response.data);
-                })
-                .catch((error) => {
-                    console.error("Error creating task:", error.response?.data || error.message);
-                });
-        }
+        API.post(`/groups/${groupId}/tasks/`, payload)
+            .then((response) => {
+                console.log("Task created successfully:", response.data);
+                onTaskCreated(response.data); // Update the task list
+            })
+            .catch((error) => {
+                console.error("Error creating task:", error.response?.data || error.message);
+                alert(error.response?.data?.message || "Failed to create task. Please try again.");
+            });
     };
 
     return (

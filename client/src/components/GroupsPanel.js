@@ -7,6 +7,9 @@ import API from "../api";
 function GroupsPanel({ onGroupSelect }) {
     // This component manages the groups in the application. 
     const [groups, setGroups] = useState([]);
+    const [users, setUsers] = useState([]); // Track users in the selected group
+    const [selectedGroupId, setSelectedGroupId] = useState(null);
+    const [selectedGroupName, setSelectedGroupName] = useState("");
     const [newGroupName, setNewGroupName] = useState("");
     const [editingGroupId, setEditingGroupId] = useState(null);
     const [editingGroupName, setEditingGroupName] = useState("");
@@ -16,6 +19,16 @@ function GroupsPanel({ onGroupSelect }) {
             .then((response) => setGroups(response.data))
             .catch((error) => console.error("Error fetching groups:", error));
     }, []);
+
+    useEffect(() => {
+        if (selectedGroupId) {
+            API.get(`/groups/${selectedGroupId}/users/`)
+                .then((response) => {
+                    setUsers(response.data); // Ensure roles are included in the response
+                })
+                .catch((error) => console.error("Error fetching users in group:", error));
+        }
+    }, [selectedGroupId]);
 
     const handleCreateGroup = () => {
         // this function handles the creation of a new group.
@@ -75,6 +88,12 @@ function GroupsPanel({ onGroupSelect }) {
             .catch((error) => console.error("Error updating group:", error));
     };
 
+    const handleGroupSelect = (groupId, groupName) => {
+        setSelectedGroupId(groupId);
+        setSelectedGroupName(groupName);
+        onGroupSelect(groupId, groupName);
+    };
+
     return (
         <div className="groups-panel">
             <h2>Groups</h2>
@@ -84,7 +103,7 @@ function GroupsPanel({ onGroupSelect }) {
                         <div className="group-frame">
                             <span
                                 className="group-name"
-                                onClick={() => onGroupSelect(group.id, group.name)}
+                                onClick={() => handleGroupSelect(group.id, group.name)}
                             >
                                 {group.name}
                             </span>
@@ -104,6 +123,20 @@ function GroupsPanel({ onGroupSelect }) {
                     </li>
                 ))}
             </ul>
+
+            {selectedGroupId && (
+                <div className="users-in-group">
+                    <h3>Users in {selectedGroupName}</h3>
+                    <ul>
+                        {users.map((user) => (
+                            <li key={user.id}>
+                                {user.name} - <strong>{user.role}</strong>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+
             <div className="create-group">
                 <input
                     type="text"
