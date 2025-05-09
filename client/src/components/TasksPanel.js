@@ -100,7 +100,6 @@ function TasksPanel({ groupId }) {
 
             {/* Task Summary Section */}
             <div className="task-summary">
-                <h3>Task Overview</h3>
                 <div className="circular-progress-container">
                     <div className="circular-progress">
                         <CircularProgressbar

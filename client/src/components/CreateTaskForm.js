@@ -80,7 +80,7 @@ function CreateTaskForm({ groupId, taskToEdit, onTaskCreated, onTaskUpdated, onC
     return (
         <div className="create-task-form">
             {/* Dynamically change the header based on the mode */}
-            <h3>{taskToEdit ? "Edit Task" : "Create Task"}</h3>
+            <h3>{taskToEdit ? "Edit Task" : "Create A Task"}</h3>
             <form onSubmit={handleSubmit}>
                 <div className="form-group">
                     <label>Task Title</label>
