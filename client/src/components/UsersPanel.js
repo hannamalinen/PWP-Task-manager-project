@@ -4,16 +4,19 @@
 
 import React, { useEffect, useState } from "react";
 import API from "../api";
+import "./UsersPanel.css"; // Add CSS for styling
 
 function UsersPanel({ groupId }) {
-    // values for the users panel
     const [users, setUsers] = useState([]);
     const [allUsers, setAllUsers] = useState([]);
+    const [selectedUser, setSelectedUser] = useState(null); // Track the selected user
     const [newUserName, setNewUserName] = useState("");
     const [newUserEmail, setNewUserEmail] = useState("");
     const [newUserPassword, setNewUserPassword] = useState("");
     const [selectedUserId, setSelectedUserId] = useState("");
     const [selectedRole, setSelectedRole] = useState("member"); // Default role is "member"
+    const [isEditing, setIsEditing] = useState(false); // Track if the user is being edited
+    const [editedUser, setEditedUser] = useState(null); // Track the edited user details
 
     useEffect(() => {
         if (groupId) {
@@ -28,10 +31,6 @@ function UsersPanel({ groupId }) {
     }, [groupId]);
 
     const handleAddUser = () => {
-        // this function handles the creation of a new user.
-        // It checks if the user name, email, and password are provided.
-        // If not, it alerts the user.
-        // If the user name, email, and password are valid, it sends a POST request to create a new user.
         if (!newUserName.trim()) {
             alert("User name is required.");
             return;
@@ -53,7 +52,6 @@ function UsersPanel({ groupId }) {
 
         API.post("/users/", payload)
             .then((response) => {
-                console.log("New user created:", response.data);
                 setAllUsers((prevUsers) => [...prevUsers, response.data]);
                 setNewUserName("");
                 setNewUserEmail("");
@@ -66,23 +64,18 @@ function UsersPanel({ groupId }) {
     };
 
     const handleAssignUserToGroup = () => {
-        // this function handles the assignment of a user to a group.
-        // It checks if a user is selected. If not, it alerts the user.
-        // If a user is selected, it sends a POST request to assign the user to the group.
-        // If the user is already a member of the group, it alerts the user.
         if (!selectedUserId) {
             alert("Please select a user to assign to the group.");
             return;
         }
 
-        const payload = { user_id: selectedUserId, role: selectedRole }; // Include the selected role
+        const payload = { user_id: selectedUserId, role: selectedRole };
 
         API.post(`/groups/${groupId}/user/`, payload)
             .then((response) => {
-                console.log("User assigned to group:", response.data);
                 setUsers((prevUsers) => [...prevUsers, response.data]);
                 setSelectedUserId("");
-                setSelectedRole("member"); // Reset role to default
+                setSelectedRole("member");
             })
             .catch((error) => {
                 console.error("Error assigning user to group:", error.response?.data || error.message);
@@ -91,17 +84,57 @@ function UsersPanel({ groupId }) {
     };
 
     const handleRemoveUserFromGroup = (userId) => {
-        // this function handles the removal of a user from a group.
-        // It prompts the user for confirmation before sending a DELETE request
-        //  to remove the user. 
-        console.log(`Removing user ${userId} from group ${groupId}`);
+        if (!window.confirm("Are you sure you want to remove this user from the group?")) return;
+
         API.delete(`/groups/${groupId}/user/`, {
-            data: { user_id: userId }, // Send user_id in the request body
+            data: { user_id: userId },
         })
             .then(() => {
-                setUsers(users.filter((user) => user.id !== userId));
+                setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
+                setSelectedUser(null); // Close the modal after removal
+            })
+            .catch((error) => console.error("Error removing user from group:", error));
+    };
+
+    const handleDeleteUser = (userId) => {
+        if (!window.confirm("Are you sure you want to delete this user?")) return;
+
+        API.delete(`/groups/${groupId}/user/`, {
+            data: { user_id: userId },
+        })
+            .then(() => {
+                setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
+                setSelectedUser(null); // Close the modal after deletion
             })
             .catch((error) => console.error("Error deleting user:", error));
+    };
+
+    const handleUserClick = (user) => {
+        setSelectedUser(user); // Set the clicked user as the selected user
+        setEditedUser(user); // Initialize the edited user details
+    };
+
+    const handleCloseDetails = () => {
+        setSelectedUser(null); // Clear the selected user
+        setIsEditing(false); // Exit editing mode
+    };
+
+    const handleEditUser = () => {
+        setIsEditing(true); // Enable editing mode
+    };
+
+    const handleSaveUser = () => {
+        API.put(`/users/${editedUser.id}/`, editedUser)
+            .then((response) => {
+                setUsers((prevUsers) =>
+                    prevUsers.map((user) =>
+                        user.id === editedUser.id ? response.data : user
+                    )
+                );
+                setSelectedUser(response.data); // Update the selected user with the saved details
+                setIsEditing(false); // Exit editing mode
+            })
+            .catch((error) => console.error("Error saving user details:", error));
     };
 
     return (
@@ -109,25 +142,37 @@ function UsersPanel({ groupId }) {
             <h2>Users in Group</h2>
             <ul className="user-list">
                 {users.map((user) => (
-                    <li key={user.id} className="user-item">
-                        <div className="user-frame">
-                            <div className="user-details">
-                                <strong>Name:</strong> {user.name} <br />
-                                <strong>Email:</strong> {user.email} <br />
-                                <strong>Role:</strong> {user.role}
-                            </div>
-                            <div className="user-actions">
-                                <button
-                                    className="remove-button"
-                                    onClick={() => handleRemoveUserFromGroup(user.id)}
-                                >
-                                    Remove
-                                </button>
-                            </div>
-                        </div>
+                    <li
+                        key={user.id}
+                        className="user-item"
+                        onClick={() => handleUserClick(user)} // Handle user click
+                    >
+                        <span className="user-name">{user.name}</span>
+                        <span className="user-role">{user.role}</span>
                     </li>
                 ))}
             </ul>
+
+            {/* User Details Modal */}
+            {selectedUser && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <h3>User Details</h3>
+                        <p><strong>Name:</strong> {selectedUser.name}</p>
+                        <p><strong>Email:</strong> {selectedUser.email}</p>
+                        <p><strong>Role:</strong> {selectedUser.role}</p>
+                        <button
+                            className="delete-button"
+                            onClick={() => handleRemoveUserFromGroup(selectedUser.id)}
+                        >
+                            Remove User from Group
+                        </button>
+                        <button className="close-button" onClick={handleCloseDetails}>
+                            Close
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <div className="add-user">
                 <h3>Create New User</h3>

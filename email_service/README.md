@@ -14,7 +14,7 @@ Then you need to run the email service in the port 8000 since 5000 is used by ta
 export FLASK_APP=email_service 
 flask run --port 8000
 ```  
-
+(ehkä flask init-db en oo varma)
 Now you should be able to use email service. When you modify deadlines or statuses of the tasks, emails should be sent at the moment in this address: pvaarani21@student.oulu.fi
 
 ## Check deadlines
