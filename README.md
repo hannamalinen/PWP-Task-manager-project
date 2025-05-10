@@ -70,44 +70,6 @@ Few example curl-commands to populate our DB:
 
 - adding a new task to group: curl -X POST http://127.0.0.1:5000/group/1/task/add/ -H "Content-Type: application/json" -d "{\"title\": \"Complete project\", \"description\": \"Finish the project by end of the week\", \"status\": 1, \"deadline\": \"2025-02-15T00:00:00\", \"created_at\": \"2025-02-01T00:00:00\", \"updated_at\": \"2025-02-01T00:00:00\"}"
 
-## Deployment - COPILOT CREATED INSTRUCTION ON HOW TO DEPLOY OUR API
-
-Prompt for Copilot: Create instructions on how to deploy our Task Management API
-
-To deploy the API, follow these steps:
-
-1. **Set up environment variables**:
-    ```sh
-    export FLASK_APP=run.py
-    export DATABASE_URL=task_management.db
-    ```
-
-2. **Run database migrations**:
-    ```sh
-    flask db upgrade
-    ```
-
-3. **Use Gunicorn to run the application**:
-    ```sh
-    gunicorn -w 4 -b 0.0.0.0:8000 run:app
-    ```
-
-4. **Configure a web server (e.g., Nginx) to proxy requests to Gunicorn**:
-    ```nginx
-    server {
-        listen 80;
-        server_name your_domain.com;
-
-        location / {
-            proxy_pass http://127.0.0.1:8000;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
-    }
-    ```
-
 ## Running Tests
 
 1. Ensure your virtual environment is activated!

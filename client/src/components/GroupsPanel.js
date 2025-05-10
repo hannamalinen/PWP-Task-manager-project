@@ -2,6 +2,7 @@
 // it allows users to create, edit, and delete groups.
 // It also allows users to select a group to view its tasks and users.
 import React, { useEffect, useState } from "react";
+import PropTypes from "prop-types"; // Import PropTypes
 import API from "../api";
 
 function GroupsPanel({ onGroupSelect }) {
@@ -161,5 +162,10 @@ function GroupsPanel({ onGroupSelect }) {
         </div>
     );
 }
+
+// Define PropTypes for the component
+GroupsPanel.propTypes = {
+    onGroupSelect: PropTypes.func.isRequired, // Ensure onGroupSelect is a required function
+};
 
 export default GroupsPanel;

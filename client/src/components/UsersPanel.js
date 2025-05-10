@@ -3,6 +3,7 @@
 // remove them from a group.
 
 import React, { useEffect, useState } from "react";
+import PropTypes from "prop-types"; // Import PropTypes
 import API from "../api";
 import "./UsersPanel.css"; // Add CSS for styling
 
@@ -15,8 +16,6 @@ function UsersPanel({ groupId }) {
     const [newUserPassword, setNewUserPassword] = useState("");
     const [selectedUserId, setSelectedUserId] = useState("");
     const [selectedRole, setSelectedRole] = useState("member"); // Default role is "member"
-    const [isEditing, setIsEditing] = useState(false); // Track if the user is being edited
-    const [editedUser, setEditedUser] = useState(null); // Track the edited user details
 
     useEffect(() => {
         if (groupId) {
@@ -96,45 +95,12 @@ function UsersPanel({ groupId }) {
             .catch((error) => console.error("Error removing user from group:", error));
     };
 
-    const handleDeleteUser = (userId) => {
-        if (!window.confirm("Are you sure you want to delete this user?")) return;
-
-        API.delete(`/groups/${groupId}/user/`, {
-            data: { user_id: userId },
-        })
-            .then(() => {
-                setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
-                setSelectedUser(null); // Close the modal after deletion
-            })
-            .catch((error) => console.error("Error deleting user:", error));
-    };
-
     const handleUserClick = (user) => {
         setSelectedUser(user); // Set the clicked user as the selected user
-        setEditedUser(user); // Initialize the edited user details
     };
 
     const handleCloseDetails = () => {
         setSelectedUser(null); // Clear the selected user
-        setIsEditing(false); // Exit editing mode
-    };
-
-    const handleEditUser = () => {
-        setIsEditing(true); // Enable editing mode
-    };
-
-    const handleSaveUser = () => {
-        API.put(`/users/${editedUser.id}/`, editedUser)
-            .then((response) => {
-                setUsers((prevUsers) =>
-                    prevUsers.map((user) =>
-                        user.id === editedUser.id ? response.data : user
-                    )
-                );
-                setSelectedUser(response.data); // Update the selected user with the saved details
-                setIsEditing(false); // Exit editing mode
-            })
-            .catch((error) => console.error("Error saving user details:", error));
     };
 
     return (
@@ -226,5 +192,10 @@ function UsersPanel({ groupId }) {
         </div>
     );
 }
+
+// Define PropTypes for the component
+UsersPanel.propTypes = {
+    groupId: PropTypes.string.isRequired, // Validate groupId as a required string
+};
 
 export default UsersPanel;

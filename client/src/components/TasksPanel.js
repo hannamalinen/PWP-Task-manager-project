@@ -13,9 +13,6 @@ function TasksPanel({ groupId }) {
     const [pendingCount, setPendingCount] = useState(0);
     const [selectedTask, setSelectedTask] = useState(null); // Track the selected task for details
     const [isEditing, setIsEditing] = useState(false); // Track if the task is being edited
-    const [title, setTitle] = useState(""); // Track new task title
-    const [description, setDescription] = useState(""); // Track new task description
-    const [deadline, setDeadline] = useState(""); // Track new task deadline
 
     useEffect(() => {
         if (groupId) {

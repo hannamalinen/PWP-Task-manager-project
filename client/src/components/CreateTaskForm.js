@@ -2,9 +2,10 @@
 // It includes fields for task title, description, status, and deadline.
 // It also includes validation for required fields and handles the submission of the form.
 import React, { useState, useEffect } from "react";
+import PropTypes from "prop-types"; // Import PropTypes
 import API from "../api";
 
-function CreateTaskForm({ groupId, taskToEdit, onTaskCreated, onTaskUpdated, onCancelEdit }) {
+function CreateTaskForm({ groupId, taskToEdit, onTaskCreated, onCancelEdit }) {
     // This component is responsible for creating and editing tasks.
     const [title, setTitle] = useState(taskToEdit ? taskToEdit.title : "");
     const [description, setDescription] = useState(taskToEdit ? taskToEdit.description : "");
@@ -60,7 +61,7 @@ function CreateTaskForm({ groupId, taskToEdit, onTaskCreated, onTaskUpdated, onC
         const payload = {
             title,
             description,
-            status: 0, // Default status for a new task
+            status,
             deadline: formattedDeadline,
             created_at: formattedCreatedAt,
             updated_at: formattedUpdatedAt,
@@ -115,5 +116,18 @@ function CreateTaskForm({ groupId, taskToEdit, onTaskCreated, onTaskUpdated, onC
         </div>
     );
 }
+
+// Define PropTypes for the component
+CreateTaskForm.propTypes = {
+    groupId: PropTypes.string.isRequired, // groupId must be a string and is required
+    taskToEdit: PropTypes.shape({
+        title: PropTypes.string,
+        description: PropTypes.string,
+        status: PropTypes.number,
+        deadline: PropTypes.string,
+    }), // taskToEdit is an object with optional fields
+    onTaskCreated: PropTypes.func.isRequired, // onTaskCreated must be a function and is required
+    onCancelEdit: PropTypes.func.isRequired, // onCancelEdit must be a function and is required
+};
 
 export default CreateTaskForm;
