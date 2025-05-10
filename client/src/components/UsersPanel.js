@@ -144,19 +144,19 @@ function UsersPanel({ groupId }) {
                 <h3>Create New User</h3>
                 <input
                     type="text"
-                    placeholder="New User Name"
+                    placeholder="Name"
                     value={newUserName}
                     onChange={(e) => setNewUserName(e.target.value)}
                 />
                 <input
                     type="email"
-                    placeholder="New User Email"
+                    placeholder="Email"
                     value={newUserEmail}
                     onChange={(e) => setNewUserEmail(e.target.value)}
                 />
                 <input
                     type="password"
-                    placeholder="New User Password"
+                    placeholder="Password"
                     value={newUserPassword}
                     onChange={(e) => setNewUserPassword(e.target.value)}
                 />
