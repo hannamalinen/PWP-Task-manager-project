@@ -1,20 +1,27 @@
-// This file creates a form for creating and editing tasks.
-// It includes fields for task title, description, status, and deadline.
-// It also includes validation for required fields and handles the submission of the form.
+/**
+ * This file defines the CreateTaskForm component, which is responsible for creating and editing tasks.
+ * It includes fields for task title, description, status, and deadline.
+ * It also includes validation for required fields and handles the submission of the form.
+ */
+
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types"; // Import PropTypes
 import API from "../api";
 
+/**
+ * CreateTaskForm component for creating and editing tasks.
+ */
 function CreateTaskForm({ groupId, taskToEdit, onTaskCreated, onCancelEdit }) {
-    // This component is responsible for creating and editing tasks.
     const [title, setTitle] = useState(taskToEdit ? taskToEdit.title : "");
     const [description, setDescription] = useState(taskToEdit ? taskToEdit.description : "");
     const [status, setStatus] = useState(0); // Default to "Pending"
     const [deadline, setDeadline] = useState("");
 
+    /**
+     * Updates the form fields when a task is being edited.
+     */
     useEffect(() => {
         if (taskToEdit) {
-            // If editing a task, set the form fields to the task's current values
             setTitle(taskToEdit.title || "");
             setDescription(taskToEdit.description || "");
             setStatus(taskToEdit.status || 0);
@@ -27,14 +34,24 @@ function CreateTaskForm({ groupId, taskToEdit, onTaskCreated, onCancelEdit }) {
         }
     }, [taskToEdit]);
 
+    /**
+     * Converts a date to a local ISO string without the 'Z' suffix.
+     *
+     * @param {string|Date} [date] - The date to convert. Defaults to the current date and time.
+     * @returns {string} The local ISO string.
+     */
     const getLocalISOString = (date) => {
-        // This function gets the local date and time in ISO format without the 'Z' suffix.
         const now = date ? new Date(date) : new Date();
         const offset = now.getTimezoneOffset() * 60000; // Offset in milliseconds
         const localTime = new Date(now.getTime() - offset);
         return localTime.toISOString().slice(0, 19); // Remove milliseconds and 'Z'
     };
 
+    /**
+     * Handles the form submission for creating or updating a task.
+     *
+     * @param {React.FormEvent} e - The form submission event.
+     */
     const handleSubmit = (e) => {
         e.preventDefault();
 

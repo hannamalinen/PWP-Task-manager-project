@@ -1,12 +1,17 @@
-// This file is responsible for managing the users in a group.
-// it includes functionality to create new users, assign them to a group, and 
-// remove them from a group.
+/**
+ * This file is responsible for managing the users in a group.
+ * it includes functionality to create new users, assign them to a group, and 
+ * remove them from a group.
+ */
 
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types"; // Import PropTypes
 import API from "../api";
 import "./UsersPanel.css"; // Add CSS for styling
 
+/**
+ * UsersPanel component for managing users in a group.
+ */
 function UsersPanel({ groupId }) {
     const [users, setUsers] = useState([]);
     const [allUsers, setAllUsers] = useState([]);
@@ -29,6 +34,10 @@ function UsersPanel({ groupId }) {
         }
     }, [groupId]);
 
+    /**
+     * Handles the creation of a new user.
+     * Validates the input fields and sends a POST request to create the user.
+     */
     const handleAddUser = () => {
         if (!newUserName.trim()) {
             alert("User name is required.");
@@ -62,6 +71,10 @@ function UsersPanel({ groupId }) {
             });
     };
 
+    /**
+     * Handles assigning a user to the group.
+     * Validates the selected user and role, then sends a POST request to assign the user.
+     */
     const handleAssignUserToGroup = () => {
         if (!selectedUserId) {
             alert("Please select a user to assign to the group.");
@@ -82,6 +95,10 @@ function UsersPanel({ groupId }) {
             });
     };
 
+    /**
+     * Handles removing a user from the group.
+     * Prompts for confirmation and sends a DELETE request to remove the user.
+     */
     const handleRemoveUserFromGroup = (userId) => {
         if (!window.confirm("Are you sure you want to remove this user from the group?")) return;
 
@@ -95,10 +112,16 @@ function UsersPanel({ groupId }) {
             .catch((error) => console.error("Error removing user from group:", error));
     };
 
+    /**
+     * Handles selecting a user to view their details.
+     */
     const handleUserClick = (user) => {
         setSelectedUser(user); // Set the clicked user as the selected user
     };
 
+    /**
+     * Closes the user details modal.
+     */
     const handleCloseDetails = () => {
         setSelectedUser(null); // Clear the selected user
     };
@@ -180,12 +203,12 @@ function UsersPanel({ groupId }) {
                     value={selectedRole}
                     onChange={(e) => setSelectedRole(e.target.value)}
                 >
-                    <option value="member">Project Manager</option>
+                    <option value="Project Managet">Project Manager</option>
                     <option value="admin">Admin</option>
-                    <option value="editor">Business Analyst</option>
-                    <option value="viewer">Technical Leader</option>
-                    <option value="owner">Summer Trainee</option>
-                    <option value="guest">HR</option>
+                    <option value="Business Analyst">Business Analyst</option>
+                    <option value="Technical Leader">Technical Leader</option>
+                    <option value="Summer Trainee">Summer Trainee</option>
+                    <option value="HR">HR</option>
                 </select>
                 <button onClick={handleAssignUserToGroup}>Assign to Group</button>
             </div>

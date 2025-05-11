@@ -1,3 +1,8 @@
+/**
+ * This file defines the main App component, which serves as the root of the application.
+ * It sets up routing, navigation, and the overall layout of the application.
+ */
+
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import MainPage from "./pages/MainPage";
@@ -6,6 +11,10 @@ import GroupPage from "./pages/GroupPage";
 import ThemeSwitcher from "./components/ThemeSwitcher"; // Add ThemeSwitcher
 import './App.css';
 
+/**
+ * App component that serves as the root of the application.
+ * It sets up routing, navigation, and the overall layout.
+ */
 function App() {
     return (
         <Router>

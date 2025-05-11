@@ -1,3 +1,4 @@
+/* Centers the circular progress bars and aligns them horizontally */
 .circular-progress-container {
     display: flex;
     justify-content: space-around;
@@ -5,6 +6,7 @@
     margin: 20px 0;
 }
 
+/* Styles each circular progress bar */
 .circular-progress {
     display: flex;
     flex-direction: column;
@@ -15,6 +17,7 @@
     margin: 0 10px;
 }
 
+/* Styles the text below the circular progress bar */
 .progress-text {
     margin-top: 10px;
     font-size: 14px;
@@ -23,6 +26,7 @@
     color: #333;
 }
 
+/* Styles each task card */
 .task-card {
     background-color: #ffe4e1; /* Light pink background */
     border: 1px solid #ffb6c1; /* Pink border */
@@ -32,20 +36,24 @@
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
+/* Adds hover effect to task cards */
 .task-card:hover {
     transform: scale(1.02);
     box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
 }
 
+/* Styles task cards with a pink background */
 .pink-card {
     background-color: #ffe4e1; /* Light pink background */
 }
 
+/* Container for tasks, aligns them horizontally with spacing */
 .tasks-container {
     display: flex;
     gap: 20px;
 }
 
+/* Styles the pending tasks section */
 .pending-tasks {
     flex: 1;
     background-color: #f8d7da;
@@ -54,6 +62,7 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* Styles the completed tasks section */
 .completed-tasks {
     flex: 1;
     background-color: #d4edda;
@@ -62,6 +71,7 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* Styles the modal overlay */
 .modal {
     position: fixed;
     top: 0;
@@ -75,6 +85,7 @@
     z-index: 1000;
 }
 
+/* Styles the modal content box */
 .modal-content {
     background-color: white;
     padding: 20px;
@@ -83,26 +94,31 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* Styles the modal header */
 .modal-content h3 {
     margin-top: 0;
 }
 
+/* Styles paragraphs inside the modal */
 .modal-content p {
     margin: 10px 0;
 }
 
+/* Styles forms inside the modal */
 .modal-content form {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
+/* Styles labels inside the modal */
 .modal-content label {
     display: flex;
     flex-direction: column;
     font-weight: bold;
 }
 
+/* Styles buttons inside the modal */
 .modal-content button {
     margin-top: 10px;
     padding: 10px;
@@ -111,16 +127,19 @@
     cursor: pointer;
 }
 
+/* Styles the submit button inside the modal */
 .modal-content button[type="submit"] {
     background-color: #4caf50;
     color: white;
 }
 
+/* Styles the cancel button inside the modal */
 .modal-content button[type="button"] {
     background-color: #f44336;
     color: white;
 }
 
+/* Styles the close button */
 .close-button {
     margin-top: 20px;
     padding: 10px 15px;
@@ -132,10 +151,12 @@
     font-size: 14px;
 }
 
+/* Adds hover effect to the close button */
 .close-button:hover {
     background-color: #d32f2f;
 }
 
+/* Styles the edit button */
 .edit-button {
     background-color: #2196f3;
     color: white;
@@ -147,10 +168,12 @@
     margin-right: 10px;
 }
 
+/* Adds hover effect to the edit button */
 .edit-button:hover {
     background-color: #1976d2;
 }
 
+/* Styles the delete button */
 .delete-button {
     background-color: #f44336;
     color: white;
@@ -161,10 +184,12 @@
     font-size: 14px;
 }
 
+/* Adds hover effect to the delete button */
 .delete-button:hover {
     background-color: #d32f2f;
 }
 
+/* Styles the mark completed button */
 .mark-completed {
     background-color: #4caf50;
     color: white;
@@ -176,10 +201,12 @@
     margin-right: 10px;
 }
 
+/* Adds hover effect to the mark completed button */
 .mark-completed:hover {
     background-color: #45a049;
 }
 
+/* Styles the view details button */
 .view-details {
     background-color: #2196f3;
     color: white;
@@ -190,10 +217,12 @@
     font-size: 14px;
 }
 
+/* Adds hover effect to the view details button */
 .view-details:hover {
     background-color: #1976d2;
 }
 
+/* Styles the task details section */
 .create-task-form {
     display: flex;
     flex-direction: column;
@@ -208,17 +237,20 @@
     margin: 0 auto;
 }
 
+/* Styles the task form header */
 .create-task-form h3 {
     text-align: center;
     color: #e91e63;
     margin-bottom: 20px;
 }
 
+/* Styles form groups inside the task creation form */
 .create-task-form .form-group {
     width: 100%;
     margin-bottom: 15px;
 }
 
+/* Styles labels inside the task creation form */
 .create-task-form label {
     display: block;
     font-weight: bold;
@@ -226,6 +258,7 @@
     text-align: center;
 }
 
+/* Styles labels inside the task creation form */
 .create-task-form input,
 .create-task-form textarea,
 .create-task-form select {
@@ -238,6 +271,7 @@
     text-align: center;
 }
 
+/* Styles the submit button inside the task creation form */
 .create-task-form button {
     display: block;
     margin: 15px auto;
@@ -251,6 +285,7 @@
     transition: background-color 0.3s ease;
 }
 
+/* Adds hover effect to the task creation form button */
 .create-task-form button:hover {
     background-color: #ad1457;
 }

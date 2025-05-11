@@ -1,3 +1,8 @@
+/**
+ * This file defines the available themes for the application.
+ * Each theme is represented as an object containing CSS variables for colors and styles.
+ * These themes can be dynamically applied to the application to change its appearance.
+ */
 export const themes = {
     light: {
         "--background-color": "#ffffff",

@@ -1,12 +1,16 @@
-// This file handles the group management functionality.
-// it allows users to create, edit, and delete groups.
-// It also allows users to select a group to view its tasks and users.
+/**
+ * This file handles the group management functionality.
+ * it allows users to create, edit, and delete groups.
+ * It also allows users to select a group to view its tasks and users.
+ */
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types"; // Import PropTypes
 import API from "../api";
 
+/**
+ * GroupsPanel component for managing groups in the application.
+ */
 function GroupsPanel({ onGroupSelect }) {
-    // This component manages the groups in the application. 
     const [groups, setGroups] = useState([]);
     const [users, setUsers] = useState([]); // Track users in the selected group
     const [selectedGroupId, setSelectedGroupId] = useState(null);
@@ -15,12 +19,18 @@ function GroupsPanel({ onGroupSelect }) {
     const [editingGroupId, setEditingGroupId] = useState(null);
     const [editingGroupName, setEditingGroupName] = useState("");
 
+    /**
+     * Fetches the list of groups from the backend when the component mounts.
+     */
     useEffect(() => {
         API.get("/groups/")
             .then((response) => setGroups(response.data))
             .catch((error) => console.error("Error fetching groups:", error));
     }, []);
 
+    /**
+     * Fetches the list of users in the selected group whenever the selected group changes.
+     */
     useEffect(() => {
         if (selectedGroupId) {
             API.get(`/groups/${selectedGroupId}/users/`)
@@ -31,10 +41,12 @@ function GroupsPanel({ onGroupSelect }) {
         }
     }, [selectedGroupId]);
 
+    /**
+     * Handles the creation of a new group.
+     * Validates the group name and sends a POST request to the backend.
+     * Updates the group list and clears the input field on success.
+     */
     const handleCreateGroup = () => {
-        // this function handles the creation of a new group.
-        // It checks if the group name is provided. If not, it alerts the user.
-        // If the group name is valid, it sends a POST request to create a new group.
         if (!newGroupName.trim()) {
             alert("Group name is required.");
             return;
@@ -48,11 +60,14 @@ function GroupsPanel({ onGroupSelect }) {
             .catch((error) => console.error("Error creating group:", error));
     };
 
+    /**
+     * Handles the deletion of a group.
+     * Prompts the user for confirmation and sends a DELETE request to the backend.
+     * Updates the group list on success.
+     *
+     * @param {number} groupId - The ID of the group to delete.
+     */
     const handleDeleteGroup = (groupId) => {
-        // this function handles the deletion of a group.
-        // It prompts the user for confirmation before sending a DELETE request to remove the group.
-        // If the user confirms, it filters out the deleted group from the state.
-        // If the user cancels, it does nothing.
         if (!window.confirm("Are you sure you want to delete this group?")) return;
 
         API.delete(`/groups/${groupId}/`)
@@ -62,14 +77,23 @@ function GroupsPanel({ onGroupSelect }) {
             .catch((error) => console.error("Error deleting group:", error));
     };
 
+    /**
+     * Handles the initiation of group editing.
+     * Sets the editing group ID and name in the state.
+     *
+     * @param {number} groupId - The ID of the group to edit.
+     * @param {string} groupName - The current name of the group.
+     */
     const handleEditGroup = (groupId, groupName) => {
-        // this function handles the editing of a group.
-        // It sets the editing group ID and name in the state.
-        // This allows the user to edit the group's name.
         setEditingGroupId(groupId);
         setEditingGroupName(groupName);
     };
 
+    /**
+     * Handles the update of a group's name.
+     * Validates the new name and sends a PUT request to the backend.
+     * Updates the group list and clears the editing state on success.
+     */
     const handleUpdateGroup = () => {
         if (!editingGroupName.trim()) {
             alert("Group name is required.");
@@ -89,6 +113,13 @@ function GroupsPanel({ onGroupSelect }) {
             .catch((error) => console.error("Error updating group:", error));
     };
 
+    /**
+     * Handles the selection of a group.
+     * Updates the selected group ID and name in the state and notifies the parent component.
+     *
+     * @param {number} groupId - The ID of the selected group.
+     * @param {string} groupName - The name of the selected group.
+     */
     const handleGroupSelect = (groupId, groupName) => {
         setSelectedGroupId(groupId);
         setSelectedGroupName(groupName);

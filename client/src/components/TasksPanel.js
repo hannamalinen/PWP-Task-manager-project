@@ -1,5 +1,8 @@
-// This file manages the tasks in a group.
-// It allows users to view, edit, and delete tasks.
+/** 
+ * This file manages the tasks in a group.
+ * It allows users to view, edit, and delete tasks.
+ */
+
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
@@ -7,6 +10,9 @@ import "react-circular-progressbar/dist/styles.css";
 import "./TasksPanel.css"; // Import CSS for styling
 import API from "../api";
 
+/**
+ * TasksPanel component for managing tasks in a group.
+ */
 function TasksPanel({ groupId }) {
     const [tasks, setTasks] = useState([]);
     const [completedCount, setCompletedCount] = useState(0);
@@ -32,15 +38,28 @@ function TasksPanel({ groupId }) {
         }
     }, [groupId]);
 
+    /**
+     * Handles the selection of a task for viewing or editing.
+     *
+     * @param {Object} task - The task to be selected.
+     */
     const handleTaskClick = (task) => {
         setSelectedTask(task); // Set the clicked task as the selected task
         setIsEditing(false); // Ensure editing mode is off when opening the modal
     };
 
+    /**
+     * Closes the task details modal.
+     */
     const handleCloseDetails = () => {
         setSelectedTask(null); // Clear the selected task
     };
 
+    /**
+     * Toggles the status of a task between pending and completed.
+     *
+     * @param {Object} task - The task whose status is being toggled.
+     */
     const handleToggleStatus = (task) => {
         const updatedTask = { ...task, status: task.status === 1 ? 0 : 1 }; // Toggle status
         API.put(`/groups/${groupId}/tasks/${task.unique_task}/`, updatedTask)
@@ -60,6 +79,9 @@ function TasksPanel({ groupId }) {
             .catch((error) => console.error("Error toggling task status:", error));
     };
 
+    /**
+     * Saves the changes made to a task.
+     */
     const handleSaveTask = () => {
         API.put(`/groups/${groupId}/tasks/${selectedTask.unique_task}/`, selectedTask)
             .then((response) => {
@@ -75,6 +97,11 @@ function TasksPanel({ groupId }) {
             .catch((error) => console.error("Error saving task:", error));
     };
 
+    /**
+     * Deletes a task from the group.
+     *
+     * @param {number} taskId - The ID of the task to delete.
+     */
     const handleDelete = (taskId) => {
         API.delete(`/groups/${groupId}/tasks/${taskId}/`)
             .then(() => {
