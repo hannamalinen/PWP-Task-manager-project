@@ -4,72 +4,71 @@
  */
 
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom"; // Add useNavigate for redirection
 import TasksPanel from "../components/TasksPanel";
 import UsersPanel from "../components/UsersPanel";
 import CreateTaskForm from "../components/CreateTaskForm";
-import API from "../api"; // Add this line
+import API from "../api";
 import "./GroupPage.css";
 
 /**
  * GroupPage component for managing a specific group.
  * Displays the group's tasks, users, and a form for creating or editing tasks.
- *
- * @returns {JSX.Element} The rendered GroupPage component.
  */
 function GroupPage() {
-    const { groupId } = useParams();
+    const { groupId } = useParams(); // Get the group ID from the URL
+    const navigate = useNavigate(); // For redirecting after deletion
     const [groupName, setGroupName] = useState("");
     const [tasks, setTasks] = useState([]);
     const [taskToEdit, setTaskToEdit] = useState(null);
 
-    /**
-     * Fetches the group details and tasks when the component mounts or when the groupId changes.
-     */
     useEffect(() => {
+        // Fetch group details
         API.get(`/groups/${groupId}/`)
             .then((response) => setGroupName(response.data.name))
             .catch((error) => console.error("Error fetching group details:", error));
 
+        // Fetch tasks for the group
         API.get(`/groups/${groupId}/tasks/`)
             .then((response) => setTasks(response.data || []))
             .catch((error) => console.error("Error fetching tasks:", error));
     }, [groupId]);
 
     /**
-     * Handles the selection of a task for editing.
-     *
-     * @param {Object} task - The task to edit.
+     * Handles the deletion of the group.
+     * Sends a DELETE request to the backend and redirects to the main page on success.
      */
-    const handleEditTask = (task) => setTaskToEdit(task);
-    
-    /**
-     * Handles the creation of a new task.
-     * Adds the new task to the list of tasks.
-     *
-     * @param {Object} newTask - The newly created task.
-     */
-    const handleTaskCreated = (newTask) => {
-        console.log("Task created:", newTask); // Log the new task for debugging
-        setTasks((prevTasks) => [...prevTasks, newTask]); // Add the new task to the tasks list
+    const handleDeleteGroup = () => {
+        if (!window.confirm("Are you sure you want to delete this group?")) return;
+
+        API.delete(`/groups/${groupId}/`)
+            .then(() => {
+                alert("Group deleted successfully!");
+                navigate("/"); // Redirect to the main page after deletion
+            })
+            .catch((error) => console.error("Error deleting group:", error));
     };
 
-    /**
-     * Handles the update of an existing task.
-     * Updates the task in the list of tasks.
-     *
-     * @param {Object} updatedTask - The updated task.
-     */
+    const handleTaskCreated = (newTask) => {
+        setTasks((prevTasks) => [...prevTasks, newTask]);
+    };
+
     const handleTaskUpdated = (updatedTask) => {
         setTasks((prevTasks) =>
             prevTasks.map((task) => (task.id === updatedTask.id ? updatedTask : task))
         );
     };
+
     const handleCancelEdit = () => setTaskToEdit(null);
 
     return (
         <div>
-            <h2 className="group-title">{groupName}</h2>
+            <div className="group-header">
+                <h2 className="group-title">{groupName}</h2>
+                <button className="delete-group-button" onClick={handleDeleteGroup}>
+                    Delete Group
+                </button>
+            </div>
             <div className="group-page">
                 <div className="panel panel-left">
                     <h3>{taskToEdit ? "Edit Task" : "Create Task"}</h3>
@@ -85,7 +84,7 @@ function GroupPage() {
                     <TasksPanel
                         groupId={groupId}
                         tasks={tasks}
-                        onEditTask={handleEditTask}
+                        onEditTask={setTaskToEdit}
                     />
                 </div>
                 <div className="panel panel-right">
