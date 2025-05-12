@@ -15,16 +15,10 @@ python version: 3.12.6
 
 Database/instance/task_management.db <-- our populated database is included in the database
 
-! Requirements included in the Github (requirements.txt) !
-Needed requirements:
-Flask
-Flask-SQLAlchemy
-datetime
+! Requirements included in requirements.txt !
 
 Remember to activate your virtual environment with these commands:
 In all steps, check if you are in the right directory!
-
-cd Database
 
 ## creating a virtual environment
 Mac:
@@ -43,7 +37,25 @@ myenv\Scripts\activate
 ## Install the dependencies
 pip install -r requirements.txt
 
+## RUNNING THE FLASK APP
+export FLASK_APP=task_manager
+flask run
+-> Running on http://127.0.0.1:5000
+
+## STARTING THE EMAIL SERVICE
+export EMAIL_SERVICE=anna.vaara.2@gmail.com
+export EMAIL_PASSWORD=yryw kjaq eagy khzf
+
+export FLASK_APP=email_service 
+flask run --port 8000
+-> * Running on http://127.0.0.1:8000
+
+## STARTING THE CLIENT
+cd client
+npm start
 ## Creating the database
+
+
 If wanted to test manually, these commands are needed:
 
 export FLASK_APP=task_manager  

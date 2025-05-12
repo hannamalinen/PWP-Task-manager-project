@@ -80,8 +80,8 @@ class Task(db.Model):
     updated_at = db.Column(db.DateTime, nullable=False)
     usergroup_id = db.Column(db.Integer,
                             db.ForeignKey('user_group.id',
-                            ondelete='CASCADE'),
-                            nullable=False)
+                            ondelete='SET NULL'),
+                            nullable=True)
     # ondelete='SET NULL' is used to set the foreign key to NULL when the referenced row is deleted
 
     user_group = db.relationship("UserGroup", back_populates="tasks")
