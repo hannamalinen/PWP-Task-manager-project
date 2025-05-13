@@ -51,13 +51,8 @@ class GroupItem(Resource):
         if not group:
             return {"error": "Group not found"}, 404
 
-        # Delete all tasks associated with the group's user groups
-        user_groups = UserGroup.query.filter_by(group_id=group_id).all()
-        for user_group in user_groups:
-            Task.query.filter_by(usergroup_id=user_group.id).delete()
-
-        # Delete the user groups
-        UserGroup.query.filter_by(group_id=group_id).delete()
+        # Delete all tasks associated with the group
+        Task.query.filter_by(group_id=group_id).delete()
 
         # Delete the group
         db.session.delete(group)
@@ -116,7 +111,7 @@ class GroupCollection(Resource):
 class UserToGroup(Resource):
     "Resource class for post method for UserToGroup"
 
-    def get(self, group_id):
+    def get(self, group_id, unique_user):
         """Get all members of a group by group ID."""
         group = db.session.get(Group, group_id)
         if not group:
@@ -130,50 +125,35 @@ class UserToGroup(Resource):
         } for member in members
         ], 200
 
-    def post(self, group_id):
-        """Add a user to a group."""
-        if not request.is_json:
-            return {"error": "Request content type must be JSON"}, 415
-        try:
-            user_id = request.json["user_id"]
-            role = request.json["role"]
-        except KeyError:
-            return {"error": "Incomplete request - missing fields"}, 400
-
+    def post(self, group_id, unique_user):
+        """Assign a user to a group by unique_user."""
         group = db.session.get(Group, group_id)
         if not group:
             return {"error": "Group not found"}, 404
 
-        user = db.session.get(User, user_id)
+        user = User.query.filter_by(unique_user=unique_user).first()
         if not user:
             return {"error": "User not found"}, 404
 
         # Check if the user is already in the group
         if UserGroup.query.filter_by(user_id=user.id, group_id=group_id).first():
-            return {"error": "User already in group"}, 400
+            return {"error": "User is already in the group"}, 400
 
         # Add the user to the group
+        role = request.json.get("role", "member")  # Default role is "member"
         user_group = UserGroup(user_id=user.id, group_id=group_id, role=role)
         db.session.add(user_group)
         db.session.commit()
 
         return {"message": "User added to group successfully"}, 201
 
-    def delete(self, group_id):
-        """Remove a user from a group."""
-        if not request.is_json:
-            return {"error": "Request content type must be JSON"}, 415
-        try:
-            data = request.get_json()  # Explicitly parse the JSON body
-            user_id = data["user_id"]
-        except (KeyError, TypeError):
-            return {"error": "Incomplete request - missing fields"}, 400
-
+    def delete(self, group_id, unique_user):
+        """Remove a user from a group by unique_user."""
         group = db.session.get(Group, group_id)
         if not group:
             return {"error": "Group not found"}, 404
 
-        user = User.query.filter_by(id=user_id).first()
+        user = User.query.filter_by(unique_user=unique_user).first()
         if not user:
             return {"error": "User not found"}, 404
 
@@ -186,21 +166,13 @@ class UserToGroup(Resource):
 
         return {"message": "User removed from group successfully"}, 204
 
-    def put(self, group_id):
-        """Update a user's role in a group."""
-        if not request.is_json:
-            return {"error": "Request content type must be JSON"}, 415
-        try:
-            user_id = request.json["user_id"]
-            role = request.json["role"]
-        except KeyError:
-            return {"error": "Incomplete request - missing fields"}, 400
-
+    def put(self, group_id, unique_user):
+        """Update a user's role in a group by unique_user."""
         group = db.session.get(Group, group_id)
         if not group:
             return {"error": "Group not found"}, 404
 
-        user = User.query.filter_by(unique_user=user_id).first()
+        user = User.query.filter_by(unique_user=unique_user).first()
         if not user:
             return {"error": "User not found"}, 404
 
@@ -208,12 +180,17 @@ class UserToGroup(Resource):
         if not user_group:
             return {"error": "User not in group"}, 400
 
-        user_group.role = role
+        # Update the role
+        new_role = request.json.get("role")
+        if not new_role:
+            return {"error": "Role is required"}, 400
+
+        user_group.role = new_role
         db.session.commit()
 
         return {"message": "User role updated successfully"}, 200
 
-class GroupMembers(Resource):
+class GroupUsers(Resource):
     def get(self, group_id):
         """Get all members of a group by group ID."""
         group = db.session.get(Group, group_id)
@@ -222,16 +199,55 @@ class GroupMembers(Resource):
 
         # Fetch all users in the group
         user_groups = UserGroup.query.filter_by(group_id=group_id).all()
-        if not user_groups:
-            return {"error": "No users found in this group"}, 404
+        print(f"User groups for group_id {group_id}: {user_groups}")  # Debug log
 
-        users = [
-            {
-                "id": user_group.user.id,
-                "name": user_group.user.name,
-                "email": user_group.user.email,
-                "role": user_group.role
-            }
-            for user_group in user_groups
-        ]
+        if not user_groups:
+            print(f"No users found in group {group_id}")
+            return [], 200
+
+        users = []
+        for user_group in user_groups:
+            if user_group.user:  # Ensure user exists
+                users.append({
+                    "id": user_group.user.id,
+                    "unique_user": user_group.user.unique_user,
+                    "name": user_group.user.name,
+                    "email": user_group.user.email,
+                    "role": user_group.role
+                })
+            else:
+                print(f"Orphaned UserGroup entry found: {user_group}")  # Debug log
+
+        print(f"Users in group {group_id}: {users}")  # Debug log
         return users, 200
+
+    def post(self, group_id):
+        """Assign a user to a group."""
+        group = db.session.get(Group, group_id)
+        if not group:
+            return {"error": "Group not found"}, 404
+
+        # Get the unique_user and role from the request
+        data = request.get_json()
+        unique_user = data.get("unique_user")
+        role = data.get("role")
+
+        if not unique_user or not role:
+            return {"error": "unique_user and role are required"}, 400
+
+        # Check if the user exists
+        user = User.query.filter_by(unique_user=unique_user).first()
+        if not user:
+            return {"error": "User not found"}, 404
+
+        # Check if the user is already in the group
+        existing_user_group = UserGroup.query.filter_by(user_id=user.id, group_id=group_id).first()
+        if existing_user_group:
+            return {"error": "User is already in this group"}, 400
+
+        # Add the user to the group
+        new_user_group = UserGroup(user_id=user.id, group_id=group.id, role=role)
+        db.session.add(new_user_group)
+        db.session.commit()
+
+        return {"message": "User added to group successfully"}, 201

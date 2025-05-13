@@ -55,13 +55,16 @@ function ControlPage() {
             email: newUserEmail,
             password: newUserPassword,
         })
-            .then(() => {
+            .then((response) => {
+                const createdUser = response.data;
+                console.log("User created successfully:", createdUser);
+                console.log("Unique User ID:", createdUser.unique_user); // Log the unique_user ID
                 alert("User created successfully!");
                 setNewUserName("");
                 setNewUserEmail("");
                 setNewUserPassword("");
             })
-            .catch((error) => console.error("Error creating user:", error));
+            .catch((error) => console.error("Error creating user:", error.response?.data || error.message));
     };
 
     /**

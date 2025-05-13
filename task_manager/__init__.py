@@ -41,8 +41,8 @@ def create_app(test_config=None):
     db.init_app(app)
     cache.init_app(app)
 
-    # Enable CORS for all routes
-    CORS(app)
+    # Enable CORS for all routes and allow requests from http://localhost:3000
+    CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
     from . import models
     from . import api

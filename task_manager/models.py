@@ -3,6 +3,9 @@ import hashlib
 import click
 from flask.cli import with_appcontext
 from task_manager import db
+import pytest
+from datetime import datetime
+
 
 # from github
 # https://github.com/enkwolf/pwp-course-sensorhub-api-example/blob/master/sensorhub/models.py
@@ -25,7 +28,7 @@ class User(db.Model):
     email = db.Column(db.String(64), unique=True, nullable=False)
     password = db.Column(db.String(64), nullable=False)
 
-    user_groups = db.relationship("UserGroup", back_populates="user")
+    user_groups = db.relationship("UserGroup", back_populates="user", cascade="all, delete-orphan")
 
 # from Lovelace
     def serialize(self, short_form=False):
@@ -78,13 +81,13 @@ class Task(db.Model):
     deadline = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, nullable=True)
     updated_at = db.Column(db.DateTime, nullable=False)
-    usergroup_id = db.Column(db.Integer,
-                            db.ForeignKey('user_group.id',
-                            ondelete='SET NULL'),
-                            nullable=True)
+    group_id = db.Column(db.Integer,
+                         db.ForeignKey('group.id', ondelete='SET NULL'),
+                         nullable=True)
     # ondelete='SET NULL' is used to set the foreign key to NULL when the referenced row is deleted
 
-    user_group = db.relationship("UserGroup", back_populates="tasks")
+   # user_group = db.relationship("UserGroup", back_populates="tasks")
+    group = db.relationship("Group", back_populates="tasks")
 
 # from Lovelace
     def serialize(self, short_form=False):
@@ -167,6 +170,8 @@ class Group(db.Model):
     user_groups = db.relationship("UserGroup",
                                 back_populates="groups",
                                 cascade="all, delete-orphan")
+    tasks = db.relationship("Task", back_populates="group", cascade="all, delete-orphan")
+
 # from Lovelace
     def serialize(self):
         " Serialize the group, from Lovelace"
@@ -204,7 +209,6 @@ class UserGroup(db.Model):
 
     user = db.relationship("User", back_populates="user_groups")
     groups = db.relationship("Group", back_populates="user_groups")
-    tasks = db.relationship("Task", back_populates="user_group")
 
 # from Lovelace
     def serialize(self):
@@ -235,3 +239,4 @@ class UserGroup(db.Model):
 def init_db_command():
     " Create new tables."
     db.create_all()
+

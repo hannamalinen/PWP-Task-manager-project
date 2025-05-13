@@ -25,14 +25,22 @@ function UsersPanel({ groupId }) {
 
     useEffect(() => {
         if (groupId) {
-            API.get(`/groups/${groupId}/members/`)
-                .then((response) => setUsers(response.data || []))
-                .catch((error) => console.error("Error fetching users:", error));
-
-            API.get("/users/")
-                .then((response) => setAllUsers(response.data || []))
-                .catch((error) => console.error("Error fetching all users:", error));
+            // Fetch users in the group
+            API.get(`/groups/${groupId}/users/`)
+                .then((response) => {
+                    console.log("Fetched users in group:", response.data); // Debug log
+                    setUsers(response.data || []);
+                })
+                .catch((error) => console.error("Error fetching users in group:", error));
         }
+
+        // Fetch all users for the dropdown
+        API.get("/users/")
+            .then((response) => {
+                console.log("Fetched all users:", response.data); // Debug log
+                setAllUsers(response.data || []);
+            })
+            .catch((error) => console.error("Error fetching all users:", error));
     }, [groupId]);
 
     /**
@@ -59,8 +67,11 @@ function UsersPanel({ groupId }) {
             password: newUserPassword,
         };
 
+        console.log("Creating user with payload:", payload); // Debug log
+
         API.post("/users/", payload)
             .then((response) => {
+                console.log("User created successfully:", response.data); // Debug log
                 setAllUsers((prevUsers) => [...prevUsers, response.data]);
                 setNewUserName("");
                 setNewUserEmail("");
@@ -82,10 +93,13 @@ function UsersPanel({ groupId }) {
             return;
         }
 
-        const payload = { user_id: selectedUserId, role: selectedRole };
+        const payload = { unique_user: selectedUserId, role: selectedRole };
 
-        API.post(`/groups/${groupId}/user/`, payload)
+        console.log("Assigning user to group:", { groupId, payload });
+
+        API.post(`/groups/${groupId}/users/`, payload)
             .then((response) => {
+                console.log("User assigned successfully:", response.data);
                 setUsers((prevUsers) => [...prevUsers, response.data]);
                 setSelectedUserId("");
                 setSelectedRole("member");
@@ -100,25 +114,36 @@ function UsersPanel({ groupId }) {
      * Handles removing a user from the group.
      * Prompts for confirmation and sends a DELETE request to remove the user.
      */
-    const handleRemoveUserFromGroup = (userId) => {
+    const handleRemoveUserFromGroup = (uniqueUserId) => {
         if (!window.confirm("Are you sure you want to remove this user from the group?")) return;
 
-        API.delete(`/groups/${groupId}/user/`, {
-            data: { user_id: userId },
-        })
+        console.log("Removing user from group:", { groupId, uniqueUserId });
+
+        API.delete(`/groups/${groupId}/users/${uniqueUserId}/`)
             .then(() => {
-                setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
+                console.log("User removed successfully:", uniqueUserId);
+                setUsers((prevUsers) => prevUsers.filter((user) => user.unique_user !== uniqueUserId));
                 setSelectedUser(null); // Close the modal after removal
             })
-            .catch((error) => console.error("Error removing user from group:", error));
+            .catch((error) => {
+                console.error("Error removing user from group:", error.response?.data || error.message);
+                alert(error.response?.data?.error || "Failed to remove user from group. Please try again.");
+            });
     };
 
     /**
      * Handles selecting a user to view their details.
      */
     const handleUserClick = (user) => {
-        setSelectedUser(user); // Set the clicked user as the selected user
+        setSelectedUser(user);
     };
+
+    // Add this useEffect to log the updated selectedUser
+    useEffect(() => {
+        if (selectedUser) {
+            console.log("Selected user:", selectedUser);
+        }
+    }, [selectedUser]);
 
     /**
      * Closes the user details modal.
@@ -131,16 +156,20 @@ function UsersPanel({ groupId }) {
         <div className="users-panel">
             <h2>Users in Group</h2>
             <ul className="user-list">
-                {users.map((user) => (
-                    <li
-                        key={user.id}
-                        className="user-item"
-                        onClick={() => handleUserClick(user)} // Handle user click
-                    >
-                        <span className="user-name">{user.name}</span>
-                        <span className="user-role">{user.role}</span>
-                    </li>
-                ))}
+                {users.length > 0 ? (
+                    users.map((user) => (
+                        <li
+                            key={user.unique_user} // Use unique_user as the key
+                            className="user-item"
+                            onClick={() => handleUserClick(user)} // Handle user click
+                        >
+                            <span className="user-name">{user.name}</span>
+                            <span className="user-role">{user.role}</span>
+                        </li>
+                    ))
+                ) : (
+                    <p>No users in this group.</p>
+                )}
             </ul>
 
             {/* User Details Modal */}
@@ -153,7 +182,7 @@ function UsersPanel({ groupId }) {
                         <p><strong>Role:</strong> {selectedUser.role}</p>
                         <button
                             className="delete-button"
-                            onClick={() => handleRemoveUserFromGroup(selectedUser.id)}
+                            onClick={() => handleRemoveUserFromGroup(selectedUser.unique_user)} // Use unique_user here
                         >
                             Remove User from Group
                         </button>
@@ -195,7 +224,7 @@ function UsersPanel({ groupId }) {
                 >
                     <option value="">Select User</option>
                     {allUsers.map((user) => (
-                        <option key={user.unique_user} value={user.id}>
+                        <option key={user.unique_user} value={user.unique_user}>
                             {user.name}
                         </option>
                     ))}
@@ -204,7 +233,7 @@ function UsersPanel({ groupId }) {
                     value={selectedRole}
                     onChange={(e) => setSelectedRole(e.target.value)}
                 >
-                    <option value="Project Managet">Project Manager</option>
+                    <option value="Project Manager">Project Manager</option>
                     <option value="admin">Admin</option>
                     <option value="Business Analyst">Business Analyst</option>
                     <option value="Technical Leader">Technical Leader</option>
