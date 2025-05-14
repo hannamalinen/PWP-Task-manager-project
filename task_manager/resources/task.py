@@ -1,12 +1,11 @@
 """This module contains the resources for the Task model."""
-import os
 import uuid
 from datetime import datetime
+import requests  # Third-party import
 from flask import request
 from flask_restful import Resource
 from task_manager.models import Task, Group
 from task_manager import db
-import requests
 
 class GroupTaskCollection(Resource):
     """Resource class for get method for GroupTaskCollection"""
@@ -40,8 +39,8 @@ class GroupTaskCollection(Resource):
             description = request.json["description"]
             status = request.json["status"]
             deadline = datetime.fromisoformat(request.json["deadline"])
-            created_at = datetime.fromisoformat(request.json["created_at"])
-            updated_at = datetime.fromisoformat(request.json["updated_at"])
+            created_at = datetime.now()
+            updated_at = datetime.now()
         except KeyError:
             return {"error": "Incomplete request - missing information"}, 400
 
@@ -81,7 +80,7 @@ class GroupTaskCollection(Resource):
         # Send email notifications (if applicable)
         if status == 1:
             email_data = {
-                "recipient": "pvaarani21@student.oulu.fi",
+                "recipient": "pvaaraniemi21@student.oulu.fi",
                 "subject": f"Task '{title}' is completed!",
                 "body": (
                     f"Hello,\n\n"
@@ -91,11 +90,12 @@ class GroupTaskCollection(Resource):
                 )
             }
             try:
-                response = requests.post("http://127.0.0.1:8000/api/emails/", json=email_data)
+                print("Sending email with data:", email_data)  # Debugging statement
+                response = requests.post("http://127.0.0.1:8000/api/emails/", json=email_data, timeout=10)
                 if response.status_code != 200:
                     print(f"Failed to send completion email: {response.json()}")
-            except requests.exceptions.RequestException as e:
-                print(f"Error contacting email service: {str(e)}")
+            except requests.exceptions.RequestException as exception:
+                print(f"Error contacting email service: {str(exception)}")
 
         return {
             "message": "Task added successfully",
@@ -108,42 +108,15 @@ class GroupTaskItem(Resource):
         """Get a task by its unique_task and returns the whole task"""
         group = db.session.get(Group, group_id)
         if not group:
+            print(f"Group with ID {group_id} not found")
             return {"error": "Group not found"}, 404
 
         task = Task.query.filter_by(unique_task=unique_task, group_id=group_id).first()
         if not task:
+            print(f"Task with unique_task {unique_task} not found in group {group_id}")
             return {"error": "Task not found"}, 404
 
-        # Send email notification for deadline reminder
-        try:
-            now = datetime.now()
-            deadline_date = task.deadline.date()
-            now_date = now.date()
-
-            days_until_deadline = (deadline_date - now_date).days
-
-            if 0 <= days_until_deadline <= 3:
-                email_data = {
-                    "recipient": "pvaarani21@student.oulu.fi",
-                    "subject": f"Reminder: Deadline for '{task.title}' is due in {days_until_deadline} day(s)",
-                    "body": (
-                        f"Hello,\n\n"
-                        f"This is a reminder that the task '{task.title}' has a deadline on "
-                        f"{task.deadline.strftime('%Y-%m-%d at %H:%M')}.\n"
-                        f"You have {days_until_deadline} day(s) left to complete it.\n\n"
-                        f"Best regards,\n"
-                        f"Task Manager App"
-                    )
-                }
-                try:
-                    response = requests.post("http://127.0.0.1:8000/api/emails/", json=email_data)
-                    if response.status_code != 200:
-                        print(f"Deadline reminder failed: {response.json()}")
-                except requests.exceptions.RequestException as e:
-                    print(f"Error contacting email service: {str(e)}")
-        except ValueError:
-            return {"error": "Invalid deadline format. Use ISO format (YYYY-MM-DDTHH:MM:SS)"}, 400
-
+        # Return the task details
         return {
             "id": task.id,
             "title": task.title,
@@ -154,7 +127,7 @@ class GroupTaskItem(Resource):
             "updated_at": task.updated_at.isoformat(),
             "group_id": task.group_id
         }, 200
-    
+
     def put(self, group_id, unique_task):
         """Updates a task information of an existing task"""
         if not request.is_json:
@@ -177,24 +150,23 @@ class GroupTaskItem(Resource):
                 return {"error": "Description must be a string"}, 400
             task.description = data["description"]
         if "status" in data:
+            if not isinstance(data["status"], int):
+                return {"error": "Status must be an integer"}, 400
+
             # Send email notification if status is changed to 1 (completed)
             if task.status != data["status"] and data["status"] == 1:
                 email_data = {
-                    "recipient": "pvaarani21@student.oulu.fi",
+                    "recipient": "pvaaraniemi21@student.oulu.fi",
                     "subject": f"Task '{task.title}' is completed!",
-                    "body": (
-                        f"Hello,\n\n"
-                        f"The task '{task.title}' in group {group.name} has been marked as completed.\n\n"
-                        f"Best regards,\n"
-                        f"Task Manager App"
-                    )
+                    "body": f"The task '{task.title}' in group {group_id} has been marked as done."
                 }
                 try:
-                    response = requests.post("http://127.0.0.1:8000/api/emails/", json=email_data)
+                    print("Sending email with data:", email_data)  # Debugging statement
+                    response = requests.post("http://127.0.0.1:8000/api/emails/", json=email_data, timeout=10)
                     if response.status_code != 200:
                         return {"error": f"Failed to send email: {response.json()}"}, response.status_code
-                except requests.exceptions.RequestException as e:
-                    return {"error": f"Failed to connect to email service: {str(e)}"}, 500
+                except requests.exceptions.RequestException as exception:
+                    return {"error": f"Failed to connect to email service: {str(exception)}"}, 500
 
             task.status = data["status"]
         if "deadline" in data:
@@ -210,7 +182,7 @@ class GroupTaskItem(Resource):
 
                 if 0 <= days_until_deadline <= 3:
                     email_data = {
-                        "recipient": "pvaarani21@student.oulu.fi",
+                        "recipient": "pvaaraniemi21@student.oulu.fi",
                         "subject": f"Reminder: Deadline for '{task.title}' is due in {days_until_deadline} day(s)",
                         "body": (
                             f"Hello,\n\n"
@@ -222,11 +194,12 @@ class GroupTaskItem(Resource):
                         )
                     }
                     try:
-                        response = requests.post("http://127.0.0.1:8000/api/emails/", json=email_data)
+                        print("Sending email with data:", email_data)  # Debugging statement
+                        response = requests.post("http://127.0.0.1:8000/api/emails/", json=email_data, timeout=10)
                         if response.status_code != 200:
                             print(f"Deadline reminder failed: {response.json()}")
-                    except requests.exceptions.RequestException as e:
-                        print(f"Error contacting email service: {str(e)}")
+                    except requests.exceptions.RequestException as exception:
+                        print(f"Error contacting email service: {str(exception)}")
             except ValueError:
                 return {"error": "Invalid deadline format. Use ISO format (YYYY-MM-DDTHH:MM:SS)"}, 400
 
@@ -238,10 +211,12 @@ class GroupTaskItem(Resource):
         """Deletes a task by its unique_task"""
         group = db.session.get(Group, group_id)
         if not group:
+            print(f"Group with ID {group_id} not found")
             return {"error": "Group not found"}, 404
 
         task = Task.query.filter_by(unique_task=unique_task, group_id=group_id).first()
         if not task:
+            print(f"Task with unique_task {unique_task} not found in group {group_id}")
             return {"error": "Task not found"}, 404
 
         db.session.delete(task)

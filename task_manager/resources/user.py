@@ -37,7 +37,7 @@ class UserItem(Resource):
             if not isinstance(data["name"], str):
                 return {"error": "Name must be a string"}, 400
             user.name = data["name"]
-            
+
         if "email" in data:
             if not isinstance(data["email"], str):
                 return {"error": "Email must be a string"}, 400
@@ -101,4 +101,3 @@ class UserCollection(Resource):
             "message": "User added successfully",
             "unique_user": new_uuid
         }, 201
-        

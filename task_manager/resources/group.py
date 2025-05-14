@@ -191,6 +191,7 @@ class UserToGroup(Resource):
         return {"message": "User role updated successfully"}, 200
 
 class GroupUsers(Resource):
+    """Resource class for get, post methods for GroupUsers"""
     def get(self, group_id):
         """Get all members of a group by group ID."""
         group = db.session.get(Group, group_id)

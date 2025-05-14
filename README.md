@@ -43,10 +43,11 @@ flask run
 -> Running on http://127.0.0.1:5000
 
 ## STARTING THE EMAIL SERVICE
-export EMAIL_SERVICE=anna.vaara.2@gmail.com
+export EMAIL_ADDRESS=anna.vaara.2@gmail.com
 export EMAIL_PASSWORD=yryw kjaq eagy khzf
 
 export FLASK_APP=email_service 
+flask init-db
 flask run --port 8000
 -> * Running on http://127.0.0.1:8000
 

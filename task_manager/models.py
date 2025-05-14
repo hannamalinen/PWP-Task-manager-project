@@ -3,8 +3,6 @@ import hashlib
 import click
 from flask.cli import with_appcontext
 from task_manager import db
-import pytest
-from datetime import datetime
 
 
 # from github
@@ -180,7 +178,7 @@ class Group(db.Model):
         }
     def deserialize(self, doc):
         " Deserialize the group"
-        self.name = doc["name"]   
+        self.name = doc["name"]
 
     @staticmethod
     def json_schema():
@@ -218,7 +216,7 @@ class UserGroup(db.Model):
         }
     def deserialize(self, doc):
         " Deserialize the usergroup"
-        self.role = doc["role"]    
+        self.role = doc["role"]
 
     @staticmethod
     def json_schema():

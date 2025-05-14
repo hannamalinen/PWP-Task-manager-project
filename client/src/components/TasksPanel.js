@@ -63,7 +63,13 @@ function TasksPanel({ groupId }) {
      * @param {Object} task - The task whose status is being toggled.
      */
     const handleToggleStatus = (task) => {
-        const updatedTask = { ...task, status: task.status === 1 ? 0 : 1 }; // Toggle status
+        const updatedTask = {
+            status: task.status === 1 ? 0 : 1,
+            title: task.title,
+            description: task.description,
+            deadline: task.deadline,
+        };
+        console.log("Updating task status:", updatedTask); // Debug log
         API.put(`/groups/${groupId}/tasks/${task.unique_task}/`, updatedTask)
             .then((response) => {
                 setTasks((prevTasks) =>
