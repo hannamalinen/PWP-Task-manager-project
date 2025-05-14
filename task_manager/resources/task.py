@@ -80,7 +80,7 @@ class GroupTaskCollection(Resource):
         # Send email notifications (if applicable)
         if status == 1:
             email_data = {
-                "recipient": "pvaaraniemi21@student.oulu.fi",
+                "recipient": "pvaarani21@student.oulu.fi",
                 "subject": f"Task '{title}' is completed!",
                 "body": (
                     f"Hello,\n\n"
@@ -91,7 +91,7 @@ class GroupTaskCollection(Resource):
             }
             try:
                 print("Sending email with data:", email_data)  # Debugging statement
-                response = requests.post("http://127.0.0.1:8000/api/emails/", json=email_data, timeout=10)
+                response = requests.post("http://127.0.0.1:8000/api/emails/", json=email_data)
                 if response.status_code != 200:
                     print(f"Failed to send completion email: {response.json()}")
             except requests.exceptions.RequestException as exception:
@@ -156,7 +156,7 @@ class GroupTaskItem(Resource):
             # Send email notification if status is changed to 1 (completed)
             if task.status != data["status"] and data["status"] == 1:
                 email_data = {
-                    "recipient": "pvaaraniemi21@student.oulu.fi",
+                    "recipient": "pvaarani21@student.oulu.fi",
                     "subject": f"Task '{task.title}' is completed!",
                     "body": f"The task '{task.title}' in group {group_id} has been marked as done."
                 }
@@ -182,7 +182,7 @@ class GroupTaskItem(Resource):
 
                 if 0 <= days_until_deadline <= 3:
                     email_data = {
-                        "recipient": "pvaaraniemi21@student.oulu.fi",
+                        "recipient": "pvaarani21@student.oulu.fi",
                         "subject": f"Reminder: Deadline for '{task.title}' is due in {days_until_deadline} day(s)",
                         "body": (
                             f"Hello,\n\n"
@@ -195,7 +195,7 @@ class GroupTaskItem(Resource):
                     }
                     try:
                         print("Sending email with data:", email_data)  # Debugging statement
-                        response = requests.post("http://127.0.0.1:8000/api/emails/", json=email_data, timeout=10)
+                        response = requests.post("http://127.0.0.1:8000/api/emails/", json=email_data)
                         if response.status_code != 200:
                             print(f"Deadline reminder failed: {response.json()}")
                     except requests.exceptions.RequestException as exception:

@@ -102,7 +102,13 @@ function TasksPanel({ groupId }) {
                 );
                 setSelectedTask(null); // Close the modal after saving
             })
-            .catch((error) => console.error("Error saving task:", error));
+            .catch((error) => {
+                if (error.response && error.response.status === 400) {
+                    alert(error.response.data.error); // Display the error message from the backend
+                } else {
+                    console.error("Error saving task:", error);
+                }
+            });
     };
 
     /**

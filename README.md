@@ -44,7 +44,7 @@ flask run
 
 ## STARTING THE EMAIL SERVICE
 export EMAIL_ADDRESS=anna.vaara.2@gmail.com
-export EMAIL_PASSWORD=yryw kjaq eagy khzf
+export EMAIL_PASSWORD='yryw kjaq eagy khzf'
 
 export FLASK_APP=email_service 
 flask init-db
@@ -53,10 +53,10 @@ flask run --port 8000
 
 ## STARTING THE CLIENT
 cd client
+npm install
 npm start
+Now the client is running in localhost:3000 and you can manage tasks, groups and users!
 ## Creating the database
-
-
 If wanted to test manually, these commands are needed:
 
 export FLASK_APP=task_manager  
@@ -90,6 +90,7 @@ Few example curl-commands to populate our DB:
 2. Run the tests using pytest:
     ```sh
     pytest tests/api_test.py
+    pytest tests/models_test.py
     ```
 # Starting the client
 First the flask app needs to be running, this is instructed above. After that:
