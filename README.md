@@ -44,7 +44,7 @@ flask run
 
 ## STARTING THE EMAIL SERVICE
 export EMAIL_ADDRESS=anna.vaara.2@gmail.com
-export EMAIL_PASSWORD='yryw kjaq eagy khzf'
+export EMAIL_PASSWORD='
 
 export FLASK_APP=email_service 
 flask init-db
